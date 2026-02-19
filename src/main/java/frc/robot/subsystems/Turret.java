@@ -36,16 +36,16 @@ import frc.robot.Constants.TurretConstants;
 import java.util.function.Supplier;
 
 public class Turret extends SubsystemBase {
-  private final double gearOneTeeth = TurretConstants.gearOneTeeth;
-  private final double gearTwoTeeth = TurretConstants.gearTwoTeeth;
+  private final double gearATeeth = TurretConstants.gearATeeth;
+  private final double gearBTeeth = TurretConstants.gearBTeeth;
   private final double turretTeeth = TurretConstants.turretTeeth;
 
-  private final double encoderARatio = 10 / gearOneTeeth;
-  private final double encoderBRatio = 10 / gearTwoTeeth;
+  private final double encoderARatio = 10 / gearATeeth;
+  private final double encoderBRatio = 10 / gearBTeeth;
 
-  private final double encoderGearing = encoderBRatio / encoderARatio;
+  private final double encoderGearing = encoderBRatio / encoderARatio; // 48/50
 
-  private final double turretReduction = (turretTeeth / 10) / (10 / gearOneTeeth);
+  private final double turretReduction = (turretTeeth / 10) / (10 / gearATeeth);
 
   private CANcoder encoderA;
   private CANcoder encoderB;
@@ -74,6 +74,7 @@ public class Turret extends SubsystemBase {
                 .withMagnetSensor(
                     new MagnetSensorConfigs()
                         .withMagnetOffset(TurretConstants.encAMagnetOffset)
+                        .withAbsoluteSensorDiscontinuityPoint(1.0)
                         .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)));
 
     encoderB
@@ -83,6 +84,7 @@ public class Turret extends SubsystemBase {
                 .withMagnetSensor(
                     new MagnetSensorConfigs()
                         .withMagnetOffset(TurretConstants.encBMagnetOffset)
+                        .withAbsoluteSensorDiscontinuityPoint(1.0)
                         .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)));
 
     turretMotor.setPosition(getAbsoluteTurretPosition().in(Rotations));
@@ -129,24 +131,37 @@ public class Turret extends SubsystemBase {
   public Angle getAbsoluteTurretPosition() {
     double eA = encoderA.getAbsolutePosition().getValue().in(Rotations);
     double eB = encoderB.getAbsolutePosition().getValue().in(Rotations);
+    SmartDashboard.putNumber("Turret/Encoder A", eA);
+    SmartDashboard.putNumber("Turret/Encoder B", eB);
 
     double predictedB = eA * (encoderGearing);
+    SmartDashboard.putNumber("Turret/predictedB", predictedB);
 
     double diff = eB - predictedB;
+    SmartDashboard.putNumber("Turret/diff", diff);
 
     diff = MathUtil.inputModulus(diff, -0.5, 0.5);
 
-    long fullRotations = Math.round(diff / (encoderGearing - 1));
+    long aRotations = (-1) * Math.round(diff / (1 - encoderGearing));
+    SmartDashboard.putNumber("Turret/aRotations", aRotations);
 
-    double motorRotations = (eA / encoderARatio) + fullRotations;
+    double motorRotations = (eA / encoderARatio) + (aRotations / encoderARatio);
+    SmartDashboard.putNumber("Turret/motorRotations", motorRotations);
 
     double turretRotations = motorRotations / turretReduction;
 
-    return Degrees.of(turretRotations * 360);
+    return Rotations.of(-turretRotations);
   }
 
   public void setTargetAngle(Angle desiredTurretAngle) {
     desiredAngle = optimizeAngle(desiredTurretAngle);
+  }
+
+  public Command moveToPosition(double angleDeg) {
+    return run(() -> {
+          turretMotor.setControl(motionMagicRequest.withPosition(Degrees.of(angleDeg)));
+        })
+        .withName("Turret  ");
   }
 
   private Angle optimizeAngle(Angle desiredAngle) {
@@ -179,8 +194,13 @@ public class Turret extends SubsystemBase {
     turretMotor.stopMotor();
   }
 
+  public void runTurret(double speed) {
+    turretMotor.set(speed);
+  }
+
   public Command setZero() {
-    return runOnce(() -> turretMotor.setPosition(0)).withName("Set Turret Zero");
+    return runOnce(() -> turretMotor.setPosition(getAbsoluteTurretPosition()))
+        .withName("Set Turret Zero");
   }
 
   public Command stop() {
@@ -208,10 +228,12 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     turretPosition.refresh();
 
-    turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle.in(Rotations)));
+    turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle));
 
     SmartDashboard.putNumber("Turret/TwoEncoder Angle", getAbsoluteTurretPosition().in(Degrees));
-    SmartDashboard.putNumber("Turret/Turret Angle", turretPosition.getValue().in(Degrees));
+    SmartDashboard.putNumber(
+        "Turret/Turret Angle", Units.rotationsToDegrees(turretPosition.getValueAsDouble()));
+
     SmartDashboard.putNumber("Turret/desired turret angle", desiredAngle.in(Degrees));
     SmartDashboard.putNumber(
         "Turret/Angle difference", desiredAngle.minus(turretPosition.getValue()).in(Degrees));

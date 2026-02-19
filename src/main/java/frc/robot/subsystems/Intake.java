@@ -24,7 +24,7 @@ import frc.robot.Constants.IntakeConstants;
 public class Intake extends SubsystemBase {
   /*Objects */
   private final TalonFX armMainMotor;
-  private final TalonFX armFollowerMotor;
+  // private final TalonFX armFollowerMotor;
   private final TalonFX intakeMotor;
   private final DigitalInput armMagnetSensor;
 
@@ -35,7 +35,7 @@ public class Intake extends SubsystemBase {
 
   private StatusSignal<Angle> armMainPosition;
 
-  private StatusSignal<Angle> armFollowerPosition;
+  // private StatusSignal<Angle> armFollowerPosition;
 
   private final StatusSignal<Current> armCurrent;
   private final StatusSignal<AngularVelocity> armVelocity;
@@ -44,18 +44,18 @@ public class Intake extends SubsystemBase {
   public Intake() {
     intakeMotor = new TalonFX(IntakeConstants.intakeID);
     armMainMotor = new TalonFX(IntakeConstants.armMainID);
-    armFollowerMotor = new TalonFX(IntakeConstants.armFollowerID);
+    // armFollowerMotor = new TalonFX(IntakeConstants.armFollowerID);
 
     armMagnetSensor = new DigitalInput(IntakeConstants.armMagnetID);
 
     armMainMotor.getConfigurator().apply(IntakeConstants.armConfigs);
-    armFollowerMotor.getConfigurator().apply(IntakeConstants.armConfigs);
+    // armFollowerMotor.getConfigurator().apply(IntakeConstants.armConfigs);
 
     armCurrent = armMainMotor.getStatorCurrent();
     armVelocity = armMainMotor.getVelocity();
 
     armMainPosition = armMainMotor.getPosition();
-    armFollowerPosition = armFollowerMotor.getPosition();
+    // armFollowerPosition = armFollowerMotor.getPosition();
   }
 
   public void setIntakeSpeed(double speed) {
@@ -74,13 +74,13 @@ public class Intake extends SubsystemBase {
     return run(() -> {
           if (downPosition) {
             armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.downPosition));
+            // armFollowerMotor.setControl(
+            //     motionMagicRequest.withPosition(IntakeConstants.downPosition));
 
           } else {
             armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.downPosition));
+            // armFollowerMotor.setControl(
+            //     motionMagicRequest.withPosition(IntakeConstants.downPosition));
           }
         })
         .withName("Intake To Position");
@@ -90,13 +90,13 @@ public class Intake extends SubsystemBase {
     return run(() -> {
           if (intakeDown) {
             armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.downPosition));
+            // armFollowerMotor.setControl(
+            //     motionMagicRequest.withPosition(IntakeConstants.downPosition));
             setIntakeSpeed(IntakeConstants.intakeSpeed);
           } else {
             armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.upPosition));
+            // armFollowerMotor.setControl(
+            //     motionMagicRequest.withPosition(IntakeConstants.upPosition));
             stopIntake();
           }
         })
@@ -114,14 +114,14 @@ public class Intake extends SubsystemBase {
 
   public void setZero() {
     armMainMotor.setPosition(0);
-    armFollowerMotor.setPosition(0);
+    // armFollowerMotor.setPosition(0);
   }
 
   public Command zeroArmCommand() {
     return Commands.run(
             () -> {
               armMainMotor.set(IntakeConstants.armZeroSpeed);
-              armFollowerMotor.set(IntakeConstants.armZeroSpeed);
+              // armFollowerMotor.set(IntakeConstants.armZeroSpeed);
 
               armCurrent.refresh();
               armVelocity.refresh();
@@ -134,7 +134,7 @@ public class Intake extends SubsystemBase {
         .andThen(
             () -> {
               armMainMotor.stopMotor();
-              armFollowerMotor.stopMotor();
+              // armFollowerMotor.stopMotor();
               setZero();
             })
         .withName("Zero Arm Command");
@@ -144,12 +144,12 @@ public class Intake extends SubsystemBase {
   public void periodic() {
     if (!isIntakeDeployed() && wasDeployedLastLoop) {
       armMainMotor.setPosition(IntakeConstants.minPosition);
-      armFollowerMotor.setPosition(IntakeConstants.minPosition);
+      // armFollowerMotor.setPosition(IntakeConstants.minPosition);
     }
     wasDeployedLastLoop = isIntakeDeployed();
 
     armMainPosition.refresh();
-    armFollowerPosition.refresh();
+    // armFollowerPosition.refresh();
 
     SmartDashboard.putNumber("Intake speed", intakeMotor.get());
     SmartDashboard.putNumber("Intake Arm Position", armMainPosition.getValue().in(Rotations));

@@ -29,8 +29,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HoodConstants;
+import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.TurretConstants;
-import frc.robot.util.SOTMCalculator;
 import java.util.function.Supplier;
 
 public class Hood extends SubsystemBase {
@@ -67,8 +67,9 @@ public class Hood extends SubsystemBase {
             HoodConstants.minAngle.in(Radians));
   }
 
-  private void zeroHood() {
-    hoodMotor.setPosition(0);
+  public void zeroHood() {
+    hoodMotor.setPosition(HoodConstants.minAngle);
+    targetAngle = HoodConstants.minAngle;
   }
 
   public Command zeroHoodCommand() {
@@ -102,12 +103,12 @@ public class Hood extends SubsystemBase {
   }
 
   public Angle getInterpolatedHoodAngle(double distanceMeters) {
-    return SOTMCalculator.hoodAngleMap.get(distanceMeters).getMeasure();
+    return SOTMConstants.hoodAngleMap.get(distanceMeters).getMeasure();
   }
 
   public Angle getInterpolatedHoodAngle(Pose2d poseA, Pose2d poseB) {
     double distance = poseA.getTranslation().getDistance(poseB.getTranslation());
-    return SOTMCalculator.hoodAngleMap.get(distance).getMeasure();
+    return SOTMConstants.hoodAngleMap.get(distance).getMeasure();
   }
 
   public void stopHood() {
@@ -159,6 +160,13 @@ public class Hood extends SubsystemBase {
     hoodPosition.refresh();
 
     hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle));
+
+    // hoodMotor.setControl(
+    //     motionMagicRequest.withPosition(
+    //         Degrees.of(
+    //             SmartDashboard.getNumber(
+    //                 "Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees)))));
+
     SmartDashboard.putNumber("Hood/targetAngle", targetAngle.in(Degrees));
 
     SmartDashboard.putNumber("Hood/Hood Angle", getHoodAngle().in(Degrees));

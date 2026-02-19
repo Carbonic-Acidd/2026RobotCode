@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.FeetPerSecond;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
@@ -76,60 +77,89 @@ public final class Constants {
     public static InterpolatingDoubleTreeMap timeOfFlightMap = new InterpolatingDoubleTreeMap();
 
     static {
-      hoodAngleMap.put(1.681, Rotation2d.fromDegrees(21.448));
-      hoodAngleMap.put(2.016, Rotation2d.fromDegrees(21.972));
-      hoodAngleMap.put(2.338, Rotation2d.fromDegrees(22.648));
-      hoodAngleMap.put(2.665, Rotation2d.fromDegrees(24.122));
-      hoodAngleMap.put(3.034, Rotation2d.fromDegrees(25.658));
-      hoodAngleMap.put(3.363, Rotation2d.fromDegrees(26.333));
-      hoodAngleMap.put(3.711, Rotation2d.fromDegrees(27.562));
-      hoodAngleMap.put(4.061, Rotation2d.fromDegrees(29.036));
-      hoodAngleMap.put(4.324, Rotation2d.fromDegrees(29.835));
-      hoodAngleMap.put(4.619, Rotation2d.fromDegrees(30.449));
-      hoodAngleMap.put(5.010, Rotation2d.fromDegrees(32.046));
-      hoodAngleMap.put(5.366, Rotation2d.fromDegrees(33.275));
-      hoodAngleMap.put(5.610, Rotation2d.fromDegrees(34.319));
-      hoodAngleMap.put(6.051, Rotation2d.fromDegrees(35.794));
-      hoodAngleMap.put(6.369, Rotation2d.fromDegrees(36.408));
-      hoodAngleMap.put(6.704, Rotation2d.fromDegrees(37.002));
-      hoodAngleMap.put(7.022, Rotation2d.fromDegrees(36.531));
+      hoodAngleMap.put(1.623, Rotation2d.fromDegrees(21.448));
+      hoodAngleMap.put(2.206, Rotation2d.fromDegrees(23.2578125));
+      hoodAngleMap.put(2.644, Rotation2d.fromDegrees(25.3339));
+      hoodAngleMap.put(3.215, Rotation2d.fromDegrees(25.3398));
+      hoodAngleMap.put(3.802, Rotation2d.fromDegrees(27.641));
+      hoodAngleMap.put(4.293, Rotation2d.fromDegrees(28.091796875));
+      hoodAngleMap.put(4.679, Rotation2d.fromDegrees(31.1015625));
+      hoodAngleMap.put(5.064, Rotation2d.fromDegrees(32.1015625));
 
-      shooterSpeedMap.put(1.681, 5.795);
-      shooterSpeedMap.put(2.016, 5.940);
-      shooterSpeedMap.put(2.338, 6.229);
-      shooterSpeedMap.put(2.665, 6.422);
-      shooterSpeedMap.put(3.034, 6.711);
-      shooterSpeedMap.put(3.363, 6.903);
-      shooterSpeedMap.put(3.711, 7.096);
-      shooterSpeedMap.put(4.061, 7.337);
-      shooterSpeedMap.put(4.324, 7.529);
-      shooterSpeedMap.put(4.619, 7.674);
-      shooterSpeedMap.put(5.010, 7.915);
-      shooterSpeedMap.put(5.366, 8.156);
-      shooterSpeedMap.put(5.610, 8.252);
-      shooterSpeedMap.put(6.051, 8.445);
-      shooterSpeedMap.put(6.369, 8.637);
-      shooterSpeedMap.put(6.704, 8.830);
-      shooterSpeedMap.put(7.022, 9.023);
+      shooterSpeedMap.put(1.623, 10.59);
+      shooterSpeedMap.put(2.206, 10.67);
+      shooterSpeedMap.put(2.644, 10.90);
+      shooterSpeedMap.put(3.215, 11.90);
+      shooterSpeedMap.put(3.802, 12.40);
+      shooterSpeedMap.put(4.293, 13.37);
+      shooterSpeedMap.put(4.679, 13.71);
+      shooterSpeedMap.put(5.064, 13.46);
 
-      timeOfFlightMap.put(1.695, 0.893);
-      timeOfFlightMap.put(2.016, 0.924);
-      timeOfFlightMap.put(2.338, 0.985);
-      timeOfFlightMap.put(2.665, 1.013);
-      timeOfFlightMap.put(3.034, 1.059);
-      timeOfFlightMap.put(3.363, 1.093);
-      timeOfFlightMap.put(3.711, 1.118);
-      timeOfFlightMap.put(4.061, 1.147);
-      timeOfFlightMap.put(4.324, 1.175);
-      timeOfFlightMap.put(4.619, 1.195);
-      timeOfFlightMap.put(5.010, 1.216);
-      timeOfFlightMap.put(5.366, 1.242);
-      timeOfFlightMap.put(5.610, 1.241);
-      timeOfFlightMap.put(6.051, 1.249);
-      timeOfFlightMap.put(6.365, 1.273);
-      timeOfFlightMap.put(6.704, 1.295);
-      timeOfFlightMap.put(7.022, 1.341);
+      timeOfFlightMap.put(1.623, 1.05);
+      timeOfFlightMap.put(2.206, 1.01);
+      timeOfFlightMap.put(2.644, 1.00);
+      timeOfFlightMap.put(3.215, 1.13);
+      timeOfFlightMap.put(3.802, 1.16);
+      timeOfFlightMap.put(4.293, 1.30);
+      timeOfFlightMap.put(4.679, 1.30);
+      timeOfFlightMap.put(5.064, 1.30);
     }
+
+    // static {
+    //   hoodAngleMap.put(1.681, Rotation2d.fromDegrees(21.448));
+    //   hoodAngleMap.put(2.016, Rotation2d.fromDegrees(21.972));
+    //   hoodAngleMap.put(2.338, Rotation2d.fromDegrees(22.648));
+    //   hoodAngleMap.put(2.665, Rotation2d.fromDegrees(24.122));
+    //   hoodAngleMap.put(3.034, Rotation2d.fromDegrees(25.658));
+    //   hoodAngleMap.put(3.363, Rotation2d.fromDegrees(26.333));
+    //   hoodAngleMap.put(3.711, Rotation2d.fromDegrees(27.562));
+    //   hoodAngleMap.put(4.061, Rotation2d.fromDegrees(29.036));
+    //   hoodAngleMap.put(4.324, Rotation2d.fromDegrees(29.835));
+    //   hoodAngleMap.put(4.619, Rotation2d.fromDegrees(30.449));
+    //   hoodAngleMap.put(5.010, Rotation2d.fromDegrees(32.046));
+    //   hoodAngleMap.put(5.366, Rotation2d.fromDegrees(33.275));
+    //   hoodAngleMap.put(5.610, Rotation2d.fromDegrees(34.319));
+    //   hoodAngleMap.put(6.051, Rotation2d.fromDegrees(35.794));
+    //   hoodAngleMap.put(6.369, Rotation2d.fromDegrees(36.408));
+    //   hoodAngleMap.put(6.704, Rotation2d.fromDegrees(37.002));
+    //   hoodAngleMap.put(7.022, Rotation2d.fromDegrees(36.531));
+
+    //   shooterSpeedMap.put(1.681, 5.795);
+    //   shooterSpeedMap.put(2.016, 5.940);
+    //   shooterSpeedMap.put(2.338, 6.229);
+    //   shooterSpeedMap.put(2.665, 6.422);
+    //   shooterSpeedMap.put(3.034, 6.711);
+    //   shooterSpeedMap.put(3.363, 6.903);
+    //   shooterSpeedMap.put(3.711, 7.096);
+    //   shooterSpeedMap.put(4.061, 7.337);
+    //   shooterSpeedMap.put(4.324, 7.529);
+    //   shooterSpeedMap.put(4.619, 7.674);
+    //   shooterSpeedMap.put(5.010, 7.915);
+    //   shooterSpeedMap.put(5.366, 8.156);
+    //   shooterSpeedMap.put(5.610, 8.252);
+    //   shooterSpeedMap.put(6.051, 8.445);
+    //   shooterSpeedMap.put(6.369, 8.637);
+    //   shooterSpeedMap.put(6.704, 8.830);
+    //   shooterSpeedMap.put(7.022, 9.023);
+
+    //   timeOfFlightMap.put(1.695, 0.893);
+    //   timeOfFlightMap.put(2.016, 0.924);
+    //   timeOfFlightMap.put(2.338, 0.985);
+    //   timeOfFlightMap.put(2.665, 1.013);
+    //   timeOfFlightMap.put(3.034, 1.059);
+    //   timeOfFlightMap.put(3.363, 1.093);
+    //   timeOfFlightMap.put(3.711, 1.118);
+    //   timeOfFlightMap.put(4.061, 1.147);
+    //   timeOfFlightMap.put(4.324, 1.175);
+    //   timeOfFlightMap.put(4.619, 1.195);
+    //   timeOfFlightMap.put(5.010, 1.216);
+    //   timeOfFlightMap.put(5.366, 1.242);
+    //   timeOfFlightMap.put(5.610, 1.241);
+    //   timeOfFlightMap.put(6.051, 1.249);
+    //   timeOfFlightMap.put(6.365, 1.273);
+    //   timeOfFlightMap.put(6.704, 1.295);
+    //   timeOfFlightMap.put(7.022, 1.341);
+    // }
   }
 
   public static class SwerveConstants {
@@ -178,7 +208,7 @@ public final class Constants {
 
     public static final Angle armMagnetOffset = Rotations.of(0);
 
-    public static final double intakeSpeed = .353;
+    public static final double intakeSpeed = .800;
 
     public static final double armStallCurrent = 6.7; // amps
     public static final double armStallVelocity = 0.1353; // rps
@@ -253,7 +283,7 @@ public final class Constants {
 
     public static final Transform3d arducamBackLeftTransform =
         new Transform3d(
-            Units.inchesToMeters(-9.6),
+            Units.inchesToMeters(-10.6),
             Units.inchesToMeters(10.6),
             Units.inchesToMeters(8.319),
             new Rotation3d(
@@ -432,23 +462,23 @@ public final class Constants {
   }
 
   public static class TurretConstants {
-    public static final double gearOneTeeth = 48;
-    public static final double gearTwoTeeth = 50;
+    public static final double gearATeeth = 48;
+    public static final double gearBTeeth = 50;
     public static final double turretTeeth = 85;
 
     public static final Angle tolerance = Degrees.of(20);
 
-    public static final double totalGearRatio = (gearOneTeeth / 10) * (turretTeeth / 10);
+    public static final double totalGearRatio = (gearATeeth / 10) * (turretTeeth / 10);
 
-    public static final Angle MIN_ANGLE = Degrees.of(-360.0);
-    public static final Angle MAX_ANGLE = Degrees.of(360.0);
+    public static final Angle MIN_ANGLE = Degrees.of(-185.0);
+    public static final Angle MAX_ANGLE = Degrees.of(185.0);
 
-    public static final Angle encAMagnetOffset = Degrees.of(0);
-    public static final Angle encBMagnetOffset = Degrees.of(0);
+    public static final Angle encAMagnetOffset = Rotations.of(-0.494384765625);
+    public static final Angle encBMagnetOffset = Rotations.of(-0.656982421875);
 
-    public static final AngularVelocity maxTurretVelocity = DegreesPerSecond.of(3 * 360);
+    public static final AngularVelocity maxTurretVelocity = DegreesPerSecond.of(1 * 360); // 3
     public static final AngularAcceleration maxTurretAcceleration =
-        DegreesPerSecondPerSecond.of(12 * 360);
+        DegreesPerSecondPerSecond.of(4 * 360); // 12
 
     public static final MotionMagicConfigs motionMagicConfigs =
         new MotionMagicConfigs()
@@ -457,13 +487,12 @@ public final class Constants {
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.0)
-            .withKV(0.0)
-            .withKA(0.0)
-            .withKG(0.00)
-            .withKP(1000.3)
+            .withKS(0.01)
+            .withKV(0.01)
+            .withKA(0.01)
+            .withKP(120.0) // 1000.3
             .withKI(0)
-            .withKD(13.53)
+            .withKD(0.1) // 13.53
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
     public static final FeedbackConfigs feedbackConfigs =
@@ -526,8 +555,8 @@ public final class Constants {
     public static final Angle minAngle = Degrees.of(21.448);
     public static final Angle maxAngle = Degrees.of(59.231);
 
-    public static final double hoodGearRatio = ((48 / 12) * (30 / 15) * (15 / 10));
-    // / ((maxAngle.minus(minAngle)).in(Degrees) / 360);
+    public static final double hoodGearRatio =
+        ((48 / 12) * (30 / 15) * (17.5 / 10) / ((maxAngle.minus(minAngle)).in(Degrees) / 360));
 
     public static final MotionMagicConfigs motionMagicConfigs =
         new MotionMagicConfigs()
@@ -536,11 +565,11 @@ public final class Constants {
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.01)
-            .withKV(0.01)
+            .withKS(0.5)
+            .withKV(0.04)
             .withKA(0.01)
             .withKG(0.2)
-            .withKP(50.0)
+            .withKP(100.0)
             .withKI(0.00)
             .withKD(0.00)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
@@ -578,7 +607,7 @@ public final class Constants {
     public static final int spindexerMotorID = 22;
     public static final int kickerMotorID = 23;
     public static final double spindexerMotorSpeed = 0.5;
-    public static final double kickerMotorSpeed = 0.5;
+    public static final double kickerMotorSpeed = 0.9;
 
     public static final MotorOutputConfigs motorOutputConfigs =
         new MotorOutputConfigs()
@@ -600,19 +629,26 @@ public final class Constants {
     public static final double shooterGearRatio = 1;
     public static final Distance flyWheelRadius = Inches.of(2.0);
 
-    public static final LinearVelocity shooterSpeedTolerance = MetersPerSecond.of(0.1);
+    public static final LinearVelocity shooterSpeedTolerance = MetersPerSecond.of(5);
+
+    public static final AngularAcceleration motionMagicAcceleration =
+        (RadiansPerSecond.of(15 / (flyWheelRadius).in(Meters)).div(Seconds.of(2)));
+    public static final double motionMagicJerk =
+        motionMagicAcceleration.in(RotationsPerSecondPerSecond) * 10;
 
     public static final MotionMagicConfigs motionMagicConfigs =
-        new MotionMagicConfigs().withMotionMagicAcceleration(0.0).withMotionMagicJerk(0.0);
+        new MotionMagicConfigs()
+            .withMotionMagicAcceleration(motionMagicAcceleration.in(RotationsPerSecondPerSecond))
+            .withMotionMagicJerk(motionMagicJerk);
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.00)
-            .withKV(0.00)
-            .withKA(0.00)
-            .withKP(0.0)
+            .withKS(0.28)
+            .withKV(0.13)
+            .withKA(0.015)
+            .withKP(0.4) // 0.15
             .withKI(0.00)
-            .withKD(0.00)
+            .withKD(0.00) // 0.02
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
     public static final FeedbackConfigs feedbackConfigs =
@@ -624,7 +660,7 @@ public final class Constants {
                 InvertedValue.CounterClockwise_Positive) // needs to spin left when wires up
             .withNeutralMode(NeutralModeValue.Coast);
     public static final CurrentLimitsConfigs currentLimitConfigs =
-        new CurrentLimitsConfigs().withSupplyCurrentLimit(45).withSupplyCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withSupplyCurrentLimit(48).withSupplyCurrentLimitEnable(true);
 
     public static final TalonFXConfiguration shooterConfigs =
         new TalonFXConfiguration()

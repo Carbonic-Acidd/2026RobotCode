@@ -93,6 +93,7 @@ public class Robot extends TimedRobot {
 
     // SmartDashboard.putNumber("GatherData/Manual Shot Angle", HoodConstants.minAngle.in(Degrees));
     // SmartDashboard.putNumber("GatherData/Manual Shot Speed", 0);
+
   }
 
   /**

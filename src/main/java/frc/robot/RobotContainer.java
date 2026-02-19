@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -13,7 +14,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.SwerveConstants;
@@ -188,25 +189,29 @@ public class RobotContainer {
 
     SmartDashboard.putData(intake.zeroArmCommand());
     SmartDashboard.putData(hood.zeroHoodCommand());
+    SmartDashboard.putData("Zero Hood", hood.runOnce(() -> hood.zeroHood()));
 
-    goalShotTarget = AllianceUtil.getHubPose();
+    SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
+    SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
 
-    inAllianceZoneTrigger.onTrue(
-        Commands.runOnce(() -> goalShotTarget = AllianceUtil.getHubPose()));
+    // goalShotTarget = AllianceUtil.getHubPose();
 
-    onLeftSideTrigger
-        .and(inAllianceZoneTrigger.negate())
-        .onTrue(Commands.runOnce(() -> goalShotTarget = leftFerryPose.get()));
+    // inAllianceZoneTrigger.onTrue(
+    //     Commands.runOnce(() -> goalShotTarget = AllianceUtil.getHubPose()));
 
-    onLeftSideTrigger
-        .negate()
-        .and(inAllianceZoneTrigger.negate())
-        .onTrue(Commands.runOnce(() -> goalShotTarget = rightFerryPose.get()));
+    // onLeftSideTrigger
+    //     .and(inAllianceZoneTrigger.negate())
+    //     .onTrue(Commands.runOnce(() -> goalShotTarget = leftFerryPose.get()));
 
-    preShiftShoot.onTrue(driverController.rumbleFor(RumbleType.kBothRumble, 1.0, 1));
+    // onLeftSideTrigger
+    //     .negate()
+    //     .and(inAllianceZoneTrigger.negate())
+    //     .onTrue(Commands.runOnce(() -> goalShotTarget = rightFerryPose.get()));
 
-    preShiftShoot.onTrue(Commands.runOnce(() -> canPreShoot = true));
-    activeHubTrigger.onFalse(Commands.runOnce(() -> canPreShoot = false));
+    // preShiftShoot.onTrue(driverController.rumbleFor(RumbleType.kBothRumble, 1.0, 1));
+
+    // preShiftShoot.onTrue(Commands.runOnce(() -> canPreShoot = true));
+    // activeHubTrigger.onFalse(Commands.runOnce(() -> canPreShoot = false));
   }
 
   private void configureFuelSim() {
@@ -248,21 +253,22 @@ public class RobotContainer {
     Trigger slowMode = driverController.leftTrigger();
     Trigger manualOverrideButton = driverController.rightStick();
     Trigger shootButton = driverController.rightTrigger();
+    Trigger resetHeadingButton = driverController.start().and(driverController.back());
 
-    (activeHubTrigger.or(() -> canPreShoot))
-        .and(automatedShootingTrigger)
-        .and(inAllianceZoneTrigger)
-        .and(shootButton.negate())
-        .and(tooCloseToHubTrigger.negate())
-        .whileTrue(
-            new ShootOnTheMove(
-                swerve,
-                turret,
-                hood,
-                shooter,
-                spindexer,
-                goalShotTargetSupplier,
-                robotVisualization));
+    // (activeHubTrigger.or(() -> canPreShoot))
+    //     .and(automatedShootingTrigger)
+    //     .and(inAllianceZoneTrigger)
+    //     .and(shootButton.negate())
+    //     .and(tooCloseToHubTrigger.negate())
+    //     .whileTrue(
+    //         new ShootOnTheMove(
+    //             swerve,
+    //             turret,
+    //             hood,
+    //             shooter,
+    //             spindexer,
+    //             goalShotTargetSupplier,
+    //             robotVisualization));
 
     swerve.setDefaultCommand(
         new GuidedTeleopSwerve(
@@ -278,15 +284,74 @@ public class RobotContainer {
             () -> manualOverrideButton.getAsBoolean() || shootButton.getAsBoolean(),
             swerve));
 
-    turret.setDefaultCommand(turret.faceTarget(goalShotTargetSupplier, swerve::getRobotPose));
+    // swerve.setDefaultCommand(
+    //     new TeleopSwerve(
+    //         driverController::getLeftY,
+    //         driverController::getLeftX,
+    //         driverController::getRightX,
+    //         () -> {
+    //           if (slowMode.getAsBoolean()) {
+    //             return SwerveConstants.slowModeMaxTranslationalSpeed;
+    //           }
+    //           return SwerveConstants.maxTranslationalSpeed;
+    //         },
+    //         swerve));
 
-    hood.setDefaultCommand(hood.aimForTarget(goalShotTargetSupplier, swerve::getRobotPose));
+    driverController
+        .rightBumper()
+        .whileTrue(intake.run(() -> intake.setIntakeSpeed(0.5)))
+        .onFalse(intake.stop());
+    driverController
+        .leftBumper()
+        .whileTrue(spindexer.run(() -> spindexer.runBoth()))
+        .onFalse(spindexer.runOnce(() -> spindexer.stopBoth()));
+    // driverController
+    //     .rightTrigger()
+    //     .whileTrue(shooter.run(() -> shooter.setGoalSpeed(MetersPerSecond.of(13))))
+    //     .onFalse(shooter.runOnce(() -> shooter.stop()));
+    driverController
+        .rightTrigger()
+        .whileTrue(
+            new ShootOnTheMove(
+                swerve,
+                turret,
+                hood,
+                shooter,
+                spindexer,
+                AllianceUtil::getHubPose,
+                robotVisualization));
 
-    intake.setDefaultCommand(intake.intakeToPosition(false));
+    // driverController.b().whileTrue(turret.run(() ->
+    // turret.runTurret(0.15))).onFalse(turret.stop());
+    // driverController
+    //     .a()
+    //     .whileTrue(turret.run(() -> turret.runTurret(-0.15)))
+    //     .onFalse(turret.stop());
+    // driverController.y().onTrue(hood.runOnce(() -> hood.zeroHood()));
+    driverController
+        .x()
+        .whileTrue(turret.faceTarget(AllianceUtil::getHubPose, swerve::getRobotPose))
+        .onFalse(turret.moveToPosition(0));
+    driverController
+        .povLeft()
+        .whileTrue(turret.moveToPosition(-45))
+        .onFalse(turret.moveToPosition(0));
+    driverController
+        .povRight()
+        .whileTrue(turret.moveToPosition(45))
+        .onFalse(turret.moveToPosition(0));
+    resetHeadingButton.onTrue(swerve.runOnce(swerve::seedFieldCentric).ignoringDisable(true));
 
-    shootButton.whileTrue(
-        new ShootOnTheMove(
-            swerve, turret, hood, shooter, spindexer, goalShotTargetSupplier, robotVisualization));
+    // turret.setDefaultCommand(turret.faceTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
+
+    // hood.setDefaultCommand(hood.aimForTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
+
+    // intake.setDefaultCommand(intake.intakeToPosition(false));
+
+    // shootButton.whileTrue(
+    //     new ShootOnTheMove(
+    //         swerve, turret, hood, shooter, spindexer, goalShotTargetSupplier,
+    // robotVisualization));
   }
 
   private void configureOperatorBindings() {

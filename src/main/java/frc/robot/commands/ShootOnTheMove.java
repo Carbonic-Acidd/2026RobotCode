@@ -12,7 +12,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.SimConstants;
 import frc.robot.subsystems.Hood;
@@ -101,7 +100,6 @@ public class ShootOnTheMove extends Command {
 
     turret.setTargetAngle(shootingParameters.turretAngle());
     hood.setTargetAngle(shootingParameters.hoodAngle());
-    SmartDashboard.putNumber("HOOD NUMBER READ HERE", shootingParameters.hoodAngle().in(Degrees));
     shooter.setGoalSpeed(shootingParameters.shooterSpeed());
     swerve.setLookAheadPose(shootingParameters.lookAheadPosition());
 
