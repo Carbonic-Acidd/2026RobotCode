@@ -26,9 +26,9 @@ import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.commands.GuidedTeleopSwerve;
 import frc.robot.commands.MoveToFuel;
 import frc.robot.commands.ShootOnTheMove;
+import frc.robot.commands.TeleopSwerve;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Intake;
@@ -157,6 +157,9 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "IntakeUntilFull", Commands.waitUntil(() -> !robotVisualization.canSimIntake()));
 
+    NamedCommands.registerCommand("Start Intake", intake.startIntake());
+    NamedCommands.registerCommand("Stop Intake", intake.stopIntake());
+
     NamedCommands.registerCommand(
         "SOTM Until Empty",
         new ShootOnTheMove(
@@ -170,7 +173,8 @@ public class RobotContainer {
             .until(() -> robotVisualization.isEmpty()));
 
     NamedCommands.registerCommand(
-        "Shoot", Commands.run(() -> shooter.setGoalSpeed(MetersPerSecond.of(1))).withTimeout(1));
+        "Shoot",
+        Commands.run(() -> shooter.reachGoalVelocity(MetersPerSecond.of(1))).withTimeout(1));
 
     configureDriverBindings();
     // configureOperatorBindings();
@@ -188,8 +192,7 @@ public class RobotContainer {
     }
 
     SmartDashboard.putData(intake.zeroArmCommand());
-    SmartDashboard.putData(hood.zeroHoodCommand());
-    SmartDashboard.putData("Zero Hood", hood.runOnce(() -> hood.zeroHood()));
+    SmartDashboard.putData("Zero Hood", hood.zeroHoodCommand());
 
     SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
     SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
@@ -270,22 +273,8 @@ public class RobotContainer {
     //             goalShotTargetSupplier,
     //             robotVisualization));
 
-    swerve.setDefaultCommand(
-        new GuidedTeleopSwerve(
-            driverController::getLeftY,
-            driverController::getLeftX,
-            driverController::getRightX,
-            () -> {
-              if (slowMode.getAsBoolean()) {
-                return SwerveConstants.slowModeMaxTranslationalSpeed;
-              }
-              return SwerveConstants.maxTranslationalSpeed;
-            },
-            () -> manualOverrideButton.getAsBoolean() || shootButton.getAsBoolean(),
-            swerve));
-
     // swerve.setDefaultCommand(
-    //     new TeleopSwerve(
+    //     new GuidedTeleopSwerve(
     //         driverController::getLeftY,
     //         driverController::getLeftX,
     //         driverController::getRightX,
@@ -295,7 +284,21 @@ public class RobotContainer {
     //           }
     //           return SwerveConstants.maxTranslationalSpeed;
     //         },
+    //         () -> manualOverrideButton.getAsBoolean() || shootButton.getAsBoolean(),
     //         swerve));
+
+    swerve.setDefaultCommand(
+        new TeleopSwerve(
+            driverController::getLeftY,
+            driverController::getLeftX,
+            driverController::getRightX,
+            () -> {
+              if (slowMode.getAsBoolean()) {
+                return SwerveConstants.slowModeMaxTranslationalSpeed;
+              }
+              return SwerveConstants.maxTranslationalSpeed;
+            },
+            swerve));
 
     driverController
         .rightBumper()
@@ -307,8 +310,8 @@ public class RobotContainer {
         .onFalse(spindexer.runOnce(() -> spindexer.stopBoth()));
     // driverController
     //     .rightTrigger()
-    //     .whileTrue(shooter.run(() -> shooter.setGoalSpeed(MetersPerSecond.of(13))))
-    //     .onFalse(shooter.runOnce(() -> shooter.stop()));
+    //     .whileTrue(spindexer.run(() -> spindexer.runBoth()))
+    //     .onFalse(spindexer.runOnce(() -> spindexer.stopBoth()));
     driverController
         .rightTrigger()
         .whileTrue(
@@ -328,23 +331,36 @@ public class RobotContainer {
     //     .whileTrue(turret.run(() -> turret.runTurret(-0.15)))
     //     .onFalse(turret.stop());
     // driverController.y().onTrue(hood.runOnce(() -> hood.zeroHood()));
+    driverController.y().onTrue(hood.zeroHoodCommand());
     driverController
         .x()
         .whileTrue(turret.faceTarget(AllianceUtil::getHubPose, swerve::getRobotPose))
-        .onFalse(turret.moveToPosition(0));
-    driverController
-        .povLeft()
-        .whileTrue(turret.moveToPosition(-45))
-        .onFalse(turret.moveToPosition(0));
-    driverController
-        .povRight()
-        .whileTrue(turret.moveToPosition(45))
-        .onFalse(turret.moveToPosition(0));
+        .onFalse(turret.moveToAngleCommand(Degrees.of(0)));
+    // driverController
+    //     .povLeft()
+    //     .whileTrue(hood.moveToAngleCommand(Degrees.of(50)))
+    //     .onFalse(hood.moveToAngleCommand(Degrees.of(25)));
+    // driverController
+    //     .povRight()
+    //     .whileTrue(hood.moveToAngleCommand(Degrees.of(35)))
+    //     .onFalse(hood.moveToAngleCommand(Degrees.of(25)));
+    // driverController
+    //     .povUp()
+    //     .whileTrue(turret.moveToAngleCommand(Degrees.of(180)))
+    //     .onFalse(turret.moveToAngleCommand(Degrees.of(0)));
+    // driverController
+    //     .povDown()
+    //     .whileTrue(turret.moveToAngleCommand(Degrees.of(90)))
+    //     .onFalse(turret.moveToAngleCommand(Degrees.of(0)));
+
     resetHeadingButton.onTrue(swerve.runOnce(swerve::seedFieldCentric).ignoringDisable(true));
 
     // turret.setDefaultCommand(turret.faceTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
+    // turret.setDefaultCommand(turret.moveToAngleCommand(Degrees.of(0)));
 
-    // hood.setDefaultCommand(hood.aimForTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
+    // hood.setDefaultCommand(hood.moveToAngleCommand(HoodConstants.minAngle));
+
+    // shooter.setDefaultCommand(shooter.stopShooter());
 
     // intake.setDefaultCommand(intake.intakeToPosition(false));
 

@@ -4,8 +4,12 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Amps;
+
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,7 +18,10 @@ import frc.robot.Constants.SpindexerConstants;
 public class Spindexer extends SubsystemBase {
   private TalonFX spindexerMotor;
   private TalonFX kickerMotor;
-  private Debouncer currentEmptyDebouncer = new Debouncer(0.4);
+  private Debouncer currentEmptyDebouncer = new Debouncer(1.0);
+
+  private StatusSignal<Current> kickerCurrent;
+  private StatusSignal<Current> spindexerCurrent;
 
   /** Creates a new Spindexer. */
   public Spindexer() {
@@ -23,6 +30,9 @@ public class Spindexer extends SubsystemBase {
 
     spindexerMotor.getConfigurator().apply(SpindexerConstants.spindexerConfigs);
     kickerMotor.getConfigurator().apply(SpindexerConstants.spindexerConfigs);
+
+    kickerCurrent = kickerMotor.getStatorCurrent();
+    spindexerCurrent = spindexerMotor.getStatorCurrent();
   }
 
   public void stopSpindexerMotor() {
@@ -41,12 +51,9 @@ public class Spindexer extends SubsystemBase {
     return kickerMotor.get();
   }
 
-  public double getCurrent() {
-    return spindexerMotor.getStatorCurrent().getValueAsDouble();
-  }
-
   public boolean currentSaysEmpty() {
-    return currentEmptyDebouncer.calculate(getCurrent() < 9.0); // random number need to test
+    return currentEmptyDebouncer.calculate(
+        spindexerCurrent.getValue().in(Amps) < 9.0); // random number need to test
   }
 
   public void runBoth() {
@@ -55,8 +62,8 @@ public class Spindexer extends SubsystemBase {
   }
 
   public void stopBoth() {
-    spindexerMotor.set(0);
-    kickerMotor.set(0);
+    spindexerMotor.stopMotor();
+    kickerMotor.stopMotor();
   }
 
   public Command runSpindexer() {
@@ -67,24 +74,16 @@ public class Spindexer extends SubsystemBase {
     return run(() -> kickerMotor.set(SpindexerConstants.kickerMotorSpeed));
   }
 
-  public Command runBothCommand() {
-    return runKicker().alongWith(runSpindexer());
-  }
-
-  public Command stopSpindexer() {
+  public Command stopSpindexerCommand() {
     return runOnce(this::stopSpindexerMotor);
   }
 
-  public Command stopKicker() {
+  public Command stopKickerCommand() {
     return runOnce(this::stopKickerMotor);
   }
 
-  public Command stopBothCommand() {
-    return stopSpindexer().alongWith(stopKicker());
-  }
-
   public Command runUntilEmptyCommand() {
-    return (runSpindexer()).until(() -> currentSaysEmpty());
+    return (run(() -> runBoth())).until(() -> currentSaysEmpty());
   }
 
   public boolean isEmpty() {
@@ -93,7 +92,11 @@ public class Spindexer extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Spindexer Current", getCurrent());
-    SmartDashboard.putBoolean("Spindexer Empty", isEmpty());
+    spindexerCurrent.refresh();
+    kickerCurrent.refresh();
+
+    SmartDashboard.putNumber("Spindexer/Spindexer Current", spindexerCurrent.getValue().in(Amps));
+    SmartDashboard.putNumber("Spindexer/Kicker Current", kickerCurrent.getValue().in(Amps));
+    SmartDashboard.putBoolean("Spindexer/Spindexer Empty", isEmpty());
   }
 }

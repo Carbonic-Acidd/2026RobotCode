@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -26,7 +25,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.SOTMConstants;
@@ -41,7 +39,8 @@ public class Hood extends SubsystemBase {
 
   private SingleJointedArmSim hoodSim;
 
-  private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0);
+  private final MotionMagicVoltage motionMagicRequest =
+      new MotionMagicVoltage(0).withEnableFOC(true);
 
   private Angle targetAngle = HoodConstants.minAngle;
 
@@ -73,25 +72,45 @@ public class Hood extends SubsystemBase {
   }
 
   public Command zeroHoodCommand() {
-    return Commands.run(
+    return runOnce(
             () -> {
-              hoodMotor.set(HoodConstants.hoodZeroSpeed);
-
-              hoodCurrent.refresh();
-              hoodVelocity.refresh();
+              hoodMotor.stopMotor();
+              hoodMotor.setPosition(HoodConstants.maxAngle);
             })
-        .until(
-            () ->
-                hoodCurrent.getValue().in(Amps) > HoodConstants.hoodStallCurrent
-                    && Math.abs(hoodVelocity.getValue().in(RotationsPerSecond))
-                        < HoodConstants.hoodStallVelocity)
+        .andThen(
+            run(() -> {
+                  hoodMotor.set(HoodConstants.hoodZeroSpeed);
+                })
+                .withTimeout(1.0))
         .andThen(
             () -> {
               hoodMotor.stopMotor();
-              zeroHood();
+              hoodMotor.setPosition(HoodConstants.minAngle.minus(Degrees.of(0.1)));
             })
         .withName("Zero Hood Command");
   }
+
+  // public Command zeroHoodCommand() {
+  //   return runOnce(() -> hoodMotor.setPosition(HoodConstants.maxAngle))
+  //       .andThen(
+  //           run(() -> {
+  //                 hoodMotor.set(HoodConstants.hoodZeroSpeed);
+
+  //                 hoodCurrent.refresh();
+  //                 hoodVelocity.refresh();
+  //               })
+  //               .withTimeout(2)
+  //               .until(
+  //                   () ->
+  //                       Math.abs(hoodCurrent.getValue().in(Amps)) >
+  // HoodConstants.hoodStallCurrent)
+  //               .andThen(
+  //                   () -> {
+  //                     hoodMotor.set(0);
+  //                     zeroHood();
+  //                   }))
+  //       .withName("Zero Hood Command");
+  // }
 
   @Logged(name = "Hood Angle")
   public Angle getHoodAngle() {
@@ -119,8 +138,9 @@ public class Hood extends SubsystemBase {
     hoodMotor.set(speed);
   }
 
-  public void setTargetAngle(Angle targetHoodAngle) {
+  public void moveToAngle(Angle targetHoodAngle) {
     targetAngle = targetHoodAngle;
+    hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle));
   }
 
   public Angle getTargetAngle() {
@@ -131,7 +151,7 @@ public class Hood extends SubsystemBase {
     return runOnce(() -> hoodMotor.stopMotor()).withName("Stop Hood");
   }
 
-  public Command moveToAngle(Angle targetPose) {
+  public Command moveToAngleCommand(Angle targetPose) {
     return run(() -> {
           hoodMotor.setControl(motionMagicRequest.withPosition(targetPose));
         })
@@ -158,14 +178,17 @@ public class Hood extends SubsystemBase {
   @Override
   public void periodic() {
     hoodPosition.refresh();
+    hoodCurrent.refresh();
 
-    hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle));
+    SmartDashboard.putNumber("Hood/Current", hoodCurrent.getValue().in(Amps));
+
+    // hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle)); // remove this
 
     // hoodMotor.setControl(
     //     motionMagicRequest.withPosition(
     //         Degrees.of(
     //             SmartDashboard.getNumber(
-    //                 "Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees)))));
+    //                 "Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees))))); // add this
 
     SmartDashboard.putNumber("Hood/targetAngle", targetAngle.in(Degrees));
 

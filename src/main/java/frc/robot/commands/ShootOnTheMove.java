@@ -49,7 +49,7 @@ public class ShootOnTheMove extends Command {
   private RobotVisualization robotVisualization;
 
   private double startTime;
-  private boolean isFirstShot = true;
+  private boolean isVisualizationFirstShot = true;
 
   public ShootOnTheMove(
       Swerve swerve,
@@ -98,9 +98,9 @@ public class ShootOnTheMove extends Command {
         SOTMCalculator.getParameters(
             swerve, turret, targetPoseSupplier.get(), fieldAccelX, fieldAccelY, fieldSpeeds);
 
-    turret.setTargetAngle(shootingParameters.turretAngle());
-    hood.setTargetAngle(shootingParameters.hoodAngle());
-    shooter.setGoalSpeed(shootingParameters.shooterSpeed());
+    turret.moveToAngle(shootingParameters.turretAngle());
+    hood.moveToAngle(shootingParameters.hoodAngle());
+    shooter.reachGoalVelocity(shootingParameters.shooterSpeed());
     swerve.setLookAheadPose(shootingParameters.lookAheadPosition());
 
     double turretErrorDeg =
@@ -110,14 +110,15 @@ public class ShootOnTheMove extends Command {
 
     if (turretSetPointDebouncer.calculate(Math.abs(turretErrorDeg) <= turretTolerance)
         && hoodSetPointDebouncer.calculate(Math.abs(hoodErrorDeg) <= hoodTolerance)
-        && shooterDebouncer.calculate(shooter.shooterAtSetPoint())) {
+        && shooterDebouncer.calculate(
+            shooter.shooterAtSetPoint(shootingParameters.shooterSpeed()))) {
       if (RobotBase.isSimulation()) { // if sim and ready to shoot
-        if (isFirstShot
+        if (isVisualizationFirstShot
             || ((Timer.getFPGATimestamp() - startTime) > 1 / SimConstants.fuelsPerSecond)) {
-          robotVisualization.shootFuel(shootingParameters);
+          robotVisualization.shootFuel();
 
           startTime = Timer.getFPGATimestamp();
-          isFirstShot = false;
+          isVisualizationFirstShot = false;
         }
       } else { // if real and ready to shoot
         spindexer.runBoth();
@@ -130,7 +131,7 @@ public class ShootOnTheMove extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    shooter.stop();
+    shooter.stopShooter();
     spindexer.stopBoth();
     turret.stopTurret();
     hood.stopHood();

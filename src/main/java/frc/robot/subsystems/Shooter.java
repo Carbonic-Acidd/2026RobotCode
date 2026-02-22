@@ -21,23 +21,30 @@ public class Shooter extends SubsystemBase {
 
   private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
-  private LinearVelocity goalSpeed = MetersPerSecond.of(0);
 
   public Shooter() {
     shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);
   }
 
-  public void setGoalSpeed(LinearVelocity speed) {
-    goalSpeed = speed;
+  public Command reachGoalVelocity(LinearVelocity goalVelocity) {
+    return run(
+        () ->
+            shooterMotor.setControl(
+                velocityRequest.withVelocity(linearToAngularVelocity(goalVelocity))));
   }
 
-  public LinearVelocity getGoalSpeed() {
-    return goalSpeed;
+  public void stopShooter() {
+    shooterMotor.setControl(
+        velocityRequest.withVelocity(linearToAngularVelocity(MetersPerSecond.of(0))));
   }
 
-  public void stop() {
+  public Command stopShooterCommand() {
     // shooterMotor.stopMotor();
-    goalSpeed = MetersPerSecond.of(0);
+    // goalSpeed = MetersPerSecond.of(0);
+    return run(
+        () ->
+            shooterMotor.setControl(
+                velocityRequest.withVelocity(linearToAngularVelocity(MetersPerSecond.of(0)))));
   }
 
   public AngularVelocity linearToAngularVelocity(LinearVelocity vel) {
@@ -54,7 +61,7 @@ public class Shooter extends SubsystemBase {
     return shooterMotor.getVelocity().getValue();
   }
 
-  public boolean shooterAtSetPoint() {
+  public boolean shooterAtSetPoint(LinearVelocity goalSpeed) {
     LinearVelocity currentSpeed = angularToLinearVelocity(getCurrentVelocity());
 
     return Math.abs(currentSpeed.in(MetersPerSecond) - goalSpeed.in(MetersPerSecond))
@@ -62,12 +69,12 @@ public class Shooter extends SubsystemBase {
     // return true;
   }
 
-  public Command runMotor() {
-    return run(() -> shooterMotor.set(0.40)); // .45
+  public Command runMotor(double speed) {
+    return run(() -> shooterMotor.set(speed));
   }
 
-  public Command stopMotor() {
-    return runOnce(() -> shooterMotor.set(0.0));
+  public void stopMotor() {
+    shooterMotor.set(0.0);
   }
 
   // public void logSolution(ShotSolution solution) {
@@ -85,22 +92,17 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalSpeed)));
+    // shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalSpeed)));
 
     // shooterMotor.setControl(
     //     velocityRequest.withVelocity(
     //         linearToAngularVelocity(
     //             MetersPerSecond.of(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)))));
-    // shooterMotor.set(SmartDashboard.getNumber("Dynamic Shooter Speed", 0));
+
     SmartDashboard.putNumber(
         "Shooter/Current Angular Velocity", getCurrentVelocity().in(RotationsPerSecond));
     SmartDashboard.putNumber(
         "Shooter/Current Linear Velocity",
         angularToLinearVelocity(getCurrentVelocity()).in(MetersPerSecond));
-    SmartDashboard.putNumber(
-        "Shooter/Goal Angular Velocity", linearToAngularVelocity(goalSpeed).in(RotationsPerSecond));
-    // SmartDashboard.putNumber("Shooter/RPM",
-    // (angularToLinearVelocity(getCurrentVelocity())/(Math.PI*))
-    SmartDashboard.putNumber("Shooter/Goal Linear Velocity", goalSpeed.in(MetersPerSecond));
   }
 }

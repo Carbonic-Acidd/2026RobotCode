@@ -62,8 +62,12 @@ public class Intake extends SubsystemBase {
     intakeMotor.set(speed);
   }
 
-  public void stopIntake() {
-    intakeMotor.stopMotor();
+  public Command startIntake() {
+    return run(() -> intakeMotor.set(IntakeConstants.intakeSpeed)).withName("Start Intake");
+  }
+
+  public Command stopIntake() {
+    return runOnce(() -> intakeMotor.stopMotor()).withName("Stop Intake");
   }
 
   public Command stop() {

@@ -5,9 +5,9 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -56,7 +56,8 @@ public class Turret extends SubsystemBase {
 
   private Angle desiredAngle = Degrees.of(0);
 
-  private final MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0);
+  private final MotionMagicVoltage motionMagicRequest =
+      new MotionMagicVoltage(0).withEnableFOC(true);
 
   private final DCMotorSim turretSim;
 
@@ -87,7 +88,7 @@ public class Turret extends SubsystemBase {
                         .withAbsoluteSensorDiscontinuityPoint(1.0)
                         .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)));
 
-    turretMotor.setPosition(getAbsoluteTurretPosition().in(Rotations));
+    turretMotor.setPosition(getAbsoluteTurretPosition());
     turretPosition = turretMotor.getPosition();
 
     turretSim =
@@ -153,15 +154,17 @@ public class Turret extends SubsystemBase {
     return Rotations.of(-turretRotations);
   }
 
-  public void setTargetAngle(Angle desiredTurretAngle) {
+  public void moveToAngle(Angle desiredTurretAngle) {
     desiredAngle = optimizeAngle(desiredTurretAngle);
+    turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle));
   }
 
-  public Command moveToPosition(double angleDeg) {
+  public Command moveToAngleCommand(Angle desiredTurretAngle) {
     return run(() -> {
-          turretMotor.setControl(motionMagicRequest.withPosition(Degrees.of(angleDeg)));
+          desiredAngle = optimizeAngle(desiredTurretAngle);
+          turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle));
         })
-        .withName("Turret  ");
+        .withName("Turret To Position ");
   }
 
   private Angle optimizeAngle(Angle desiredAngle) {
@@ -198,9 +201,9 @@ public class Turret extends SubsystemBase {
     turretMotor.set(speed);
   }
 
-  public Command setZero() {
+  public Command resetTurretPosition() {
     return runOnce(() -> turretMotor.setPosition(getAbsoluteTurretPosition()))
-        .withName("Set Turret Zero");
+        .withName("Reset Turret Position");
   }
 
   public Command stop() {
@@ -208,7 +211,7 @@ public class Turret extends SubsystemBase {
   }
 
   public double getTurretVelocity() {
-    return turretMotor.getVelocity().getValue().in(RotationsPerSecond);
+    return turretMotor.getVelocity().getValue().in(DegreesPerSecond);
   }
 
   public boolean hasDriftedTooMuch(Angle tolerance) {
@@ -228,13 +231,14 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     turretPosition.refresh();
 
-    turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle));
+    // turretMotor.setControl(motionMagicRequest.withPosition(desiredAngle));
 
     SmartDashboard.putNumber("Turret/TwoEncoder Angle", getAbsoluteTurretPosition().in(Degrees));
     SmartDashboard.putNumber(
         "Turret/Turret Angle", Units.rotationsToDegrees(turretPosition.getValueAsDouble()));
 
     SmartDashboard.putNumber("Turret/desired turret angle", desiredAngle.in(Degrees));
+
     SmartDashboard.putNumber(
         "Turret/Angle difference", desiredAngle.minus(turretPosition.getValue()).in(Degrees));
 

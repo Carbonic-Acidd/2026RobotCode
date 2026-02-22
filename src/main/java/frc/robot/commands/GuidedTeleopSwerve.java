@@ -63,7 +63,7 @@ public class GuidedTeleopSwerve extends Command {
 
   private final Trigger inBumpZoneTrigger;
 
-  private final PIDController trenchYController = new PIDController(6, 0, 0);
+  private final PIDController trenchYController = new PIDController(3.53, 0, 0);
   private final PIDController rotationController = new PIDController(8, 0, 0);
 
   private DriveMode currentDriveMode = DriveMode.NormalDrive;
@@ -215,7 +215,7 @@ public class GuidedTeleopSwerve extends Command {
 
     DriveMode effectiveDriveMode =
         (manualOverrideSupplier.getAsBoolean()
-                || (dotProduct < 0.05)) // only lock if in trying to drive in that direction
+                || (dotProduct < 0.10)) // only lock if in trying to drive in that direction
             ? DriveMode.NormalDrive
             : currentDriveMode;
 

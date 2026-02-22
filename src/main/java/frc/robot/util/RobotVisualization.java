@@ -20,7 +20,6 @@ import frc.robot.subsystems.Hood;
 import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Turret;
-import frc.robot.util.SOTMCalculator.ShootingParameters;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class RobotVisualization {
         .withName("ShootFuelGatherData");
   }
 
-  public void shootFuel(ShootingParameters shootingParameters) {
+  public void shootFuel() {
     if (RobotBase.isReal()) return;
     if (fuelStored < 1) return;
 
@@ -111,7 +110,7 @@ public class RobotVisualization {
     // once turret is tuned better
     FuelSim.getInstance()
         .launchFuel(
-            shooter.getGoalSpeed(),
+            shooter.angularToLinearVelocity(shooter.getCurrentVelocity()),
             Radians.of(Math.PI / 2).minus(hood.getHoodAngle()),
             swerve.getRobotPose().getRotation().getMeasure().plus(turret.getTurretAngle()),
             TurretConstants.robotToTurret);

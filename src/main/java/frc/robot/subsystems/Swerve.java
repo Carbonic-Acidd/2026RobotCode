@@ -568,6 +568,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
   public void periodic() {
     double startTime = Timer.getFPGATimestamp();
     stateCache = getState();
+    SmartDashboard.putNumber("Swerve/Gyro Position", getPigeonRotation().getDegrees());
 
     Translation2d turretPose =
         stateCache
