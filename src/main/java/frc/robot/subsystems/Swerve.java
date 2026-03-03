@@ -139,7 +139,8 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
           FieldConstants.aprilTagLayout, VisionConstants.arducamBackLeftTransform);
 
   private PhotonPoseEstimator backRightPoseEstimator =
-      new PhotonPoseEstimator(FieldConstants.aprilTagLayout, VisionConstants.arducamBackRightTransform);
+      new PhotonPoseEstimator(
+          FieldConstants.aprilTagLayout, VisionConstants.arducamBackRightTransform);
 
   private List<PhotonPipelineResult> latestArducamLeftResult;
   private List<PhotonPipelineResult> latestArducamRightResult;

@@ -70,7 +70,7 @@ public class ShootOnTheMove extends Command {
     this.targetPoseSupplier = targetPoseSupplier;
     this.robotVisualization = robotVisualization;
     this.scoringMode = scoringMode;
-    addRequirements(hood, turret, shooter);
+    addRequirements(hood, turret, shooter, spindexer);
   }
 
   // Called when the command is initially scheduled.

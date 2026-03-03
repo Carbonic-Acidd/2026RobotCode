@@ -303,12 +303,12 @@ public final class Constants {
     public static final int armMainID = 14;
     public static final int armFollowerID = 15;
     public static final int intakeID = 16;
-    public static final int armMagnetID = 17;
+    // public static final int armMagnetID = 17;
 
-    public static final double armGearRatio = 36 / 12;
+    public static final double armGearRatio = 32.72727272727;
     // 111.182298 - 15.025 = 96;
     public static final Angle minPosition = Degrees.of(0.0);
-    public static final Angle maxPosition = Degrees.of(96.157298);
+    public static final Angle maxPosition = Degrees.of(97.57298);
 
     public static final Angle downPosition = maxPosition;
     public static final Angle upPosition = minPosition;
@@ -317,33 +317,42 @@ public final class Constants {
 
     public static final Angle armMagnetOffset = Rotations.of(0);
 
-    public static final double intakeSpeed = .800;
+    public static final double intakeSpeed = 0.900;
 
     public static final double armStallCurrent = 6.7; // amps
     public static final double armStallVelocity = 0.1353; // rps
-    public static final double armZeroSpeed = -0.20;
+    public static final double armZeroSpeed = 0.15;
 
     public static final MotionMagicConfigs motionMagicConfigs =
         new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(RotationsPerSecond.of(40))
-            .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(80));
+            .withMotionMagicCruiseVelocity(RotationsPerSecond.of(20))
+            .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(40));
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.0)
-            .withKV(0.0)
-            .withKA(0.0)
-            .withKG(0.00)
-            .withKP(20.0)
+            .withKS(0.1)
+            .withKV(0.02)
+            .withKA(0.01)
+            .withKG(0.0353)
+            .withKP(35.0)
             .withKI(0.00)
-            .withKD(0.00)
+            .withKD(0.1)
             .withGravityType(GravityTypeValue.Arm_Cosine)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
     public static final FeedbackConfigs feedbackConfigs =
         new FeedbackConfigs().withSensorToMechanismRatio(armGearRatio);
 
-    public static final MotorOutputConfigs motorOutputConfigs =
+    public static final MotorOutputConfigs mainMotorOutputConfigs =
+        new MotorOutputConfigs()
+            .withInverted(InvertedValue.CounterClockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
+    public static final MotorOutputConfigs followerMotorOutputConfigs =
+        new MotorOutputConfigs()
+            .withInverted(InvertedValue.Clockwise_Positive)
+            .withNeutralMode(NeutralModeValue.Brake);
+
+    public static final MotorOutputConfigs intakeMotorOutputConfigs =
         new MotorOutputConfigs()
             .withInverted(InvertedValue.CounterClockwise_Positive)
             .withNeutralMode(NeutralModeValue.Brake);
@@ -358,14 +367,28 @@ public final class Constants {
     public static final CurrentLimitsConfigs currentLimitConfigs =
         new CurrentLimitsConfigs().withSupplyCurrentLimit(45).withSupplyCurrentLimitEnable(true);
 
-    public static final TalonFXConfiguration armConfigs =
+    public static final TalonFXConfiguration armMainConfigs =
         new TalonFXConfiguration()
             .withCurrentLimits(currentLimitConfigs)
             .withSlot0(slot0Configs)
             .withMotionMagic(motionMagicConfigs)
             .withFeedback(feedbackConfigs)
-            .withMotorOutput(motorOutputConfigs)
+            .withMotorOutput(mainMotorOutputConfigs)
             .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
+
+    public static final TalonFXConfiguration armFollowerConfigs =
+        new TalonFXConfiguration()
+            .withCurrentLimits(currentLimitConfigs)
+            .withSlot0(slot0Configs)
+            .withMotionMagic(motionMagicConfigs)
+            .withFeedback(feedbackConfigs)
+            .withMotorOutput(followerMotorOutputConfigs)
+            .withSoftwareLimitSwitch(softwareLimitSwitchConfigs);
+
+    public static final TalonFXConfiguration intakeConfigs =
+        new TalonFXConfiguration()
+            .withCurrentLimits(currentLimitConfigs)
+            .withMotorOutput(intakeMotorOutputConfigs);
   }
 
   public static class VisionConstants {
@@ -373,9 +396,9 @@ public final class Constants {
 
     public static final Transform3d arducamLeftTransform =
         new Transform3d(
-            Units.inchesToMeters(0.036),
-            Units.inchesToMeters(12.89),
-            Units.inchesToMeters(11.8 - 0.38),
+            Units.inchesToMeters(-5.970),
+            Units.inchesToMeters(12.930),
+            Units.inchesToMeters(14.223),
             new Rotation3d(
                 0, Units.degreesToRadians(-25), Units.degreesToRadians(90))); // Pitch: 65
 
@@ -383,7 +406,7 @@ public final class Constants {
 
     public static final Transform3d arducamRightTransform =
         new Transform3d(
-            Units.inchesToMeters(2.8),
+            Units.inchesToMeters(3.054),
             Units.inchesToMeters(-12.8),
             Units.inchesToMeters(9.4 + 0.21),
             new Rotation3d(
@@ -393,7 +416,7 @@ public final class Constants {
 
     public static final Transform3d arducamBackLeftTransform =
         new Transform3d(
-            Units.inchesToMeters(-10.6),
+            Units.inchesToMeters(-9.6),
             Units.inchesToMeters(10.6),
             Units.inchesToMeters(8.319),
             new Rotation3d(
@@ -581,8 +604,8 @@ public final class Constants {
 
     public static final double totalGearRatio = (gearATeeth / 10) * (turretTeeth / 10);
 
-    public static final Angle MIN_ANGLE = Degrees.of(-185.0);
-    public static final Angle MAX_ANGLE = Degrees.of(185.0);
+    public static final Angle MIN_ANGLE = Degrees.of(-270.0);
+    public static final Angle MAX_ANGLE = Degrees.of(90.0);
 
     public static final Angle encAMagnetOffset = Rotations.of(-0.52294921875);
     public static final Angle encBMagnetOffset = Rotations.of(-0.684814453125);
@@ -720,8 +743,10 @@ public final class Constants {
   public static class SpindexerConstants {
     public static final int spindexerMotorID = 22;
     public static final int kickerMotorID = 23;
-    public static final double spindexerMotorSpeed = 0.5;
+    public static final double spindexerMotorSpeed = 0.80;
     public static final double kickerMotorSpeed = 0.9;
+
+    public static final int kickerLaserID = 26;
 
     public static final double spindexerIdleSpeed = -0.15;
     public static final double kickerIdleSpeed = -0.15;
@@ -735,7 +760,7 @@ public final class Constants {
             .withNeutralMode(NeutralModeValue.Brake);
 
     public static final CurrentLimitsConfigs currentLimitConfigs =
-        new CurrentLimitsConfigs().withSupplyCurrentLimit(45).withSupplyCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true);
 
     public static final TalonFXConfiguration spindexerConfigs =
         new TalonFXConfiguration()

@@ -20,13 +20,13 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -59,7 +59,7 @@ public class Turret extends SubsystemBase {
   private final MotionMagicVoltage motionMagicRequest =
       new MotionMagicVoltage(0).withEnableFOC(true);
 
-  private final DCMotorSim turretSim;
+  private DCMotorSim turretSim;
 
   public Turret() {
     encoderA = new CANcoder(TurretConstants.encoderAID);
@@ -91,11 +91,13 @@ public class Turret extends SubsystemBase {
     turretMotor.setPosition(getAbsoluteTurretPosition());
     turretPosition = turretMotor.getPosition();
 
-    turretSim =
-        new DCMotorSim(
-            LinearSystemId.createDCMotorSystem(
-                DCMotor.getKrakenX60(1), 0.196, TurretConstants.totalGearRatio),
-            DCMotor.getKrakenX60(1));
+    if (RobotBase.isSimulation()) {
+      turretSim =
+          new DCMotorSim(
+              LinearSystemId.createDCMotorSystem(
+                  DCMotor.getKrakenX60(1), 0.196, TurretConstants.totalGearRatio),
+              DCMotor.getKrakenX60(1));
+    }
   }
 
   public Command faceTarget(Supplier<Pose2d> targetSupplier, Supplier<Pose2d> robotPoseSupplier) {
@@ -222,10 +224,10 @@ public class Turret extends SubsystemBase {
     return Math.abs(Units.radiansToDegrees(errorRad)) > tolerance.in(Degrees);
   }
 
-  @Logged(name = "Zeroed Poses Turret")
-  public Pose3d[] zeroedComponentPoses() {
-    return new Pose3d[] {new Pose3d(), new Pose3d(), new Pose3d(), new Pose3d()};
-  }
+  // @Logged(name = "Zeroed Poses Turret")
+  // public Pose3d[] zeroedComponentPoses() {
+  //   return new Pose3d[] {new Pose3d(), new Pose3d(), new Pose3d(), new Pose3d()};
+  // }
 
   @Override
   public void periodic() {

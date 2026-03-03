@@ -1,7 +1,6 @@
 package frc.robot.util;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -11,10 +10,8 @@ import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SOTMConstants;
-import frc.robot.Constants.SimConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.Turret;
@@ -26,7 +23,8 @@ public class SOTMCalculator {
   //   public static InterpolatingDoubleTreeMap timeOfFlightMap = SOTMConstants.timeOfFlightMap;
 
   private static Translation2d robotToTurret2d = TurretConstants.robotToTurret.toTranslation2d();
-//   public static Time accelTime = Seconds.of(SimConstants.loopPeriodSecs);
+
+  //   public static Time accelTime = Seconds.of(SimConstants.loopPeriodSecs);
 
   public record ShootingParameters(
       LinearVelocity shooterSpeed,

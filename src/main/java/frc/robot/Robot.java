@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import au.grapplerobotics.CanBridge;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.epilogue.Epilogue;
@@ -20,8 +21,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.util.FuelSim;
 import frc.robot.util.HubTracker;
+// import frc.robot.util.FuelSim;
 import frc.robot.util.LogUtil;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -47,6 +48,8 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
+    // CanBridge.runTCP();
+
     DataLogManager.start();
     DriverStation.startDataLog(DataLogManager.getLog());
 
@@ -192,8 +195,8 @@ public class Robot extends TimedRobot {
   /** This function is called once when the robot is first started up. */
   @Override
   public void simulationInit() {
-    FuelSim.Hub.RED_HUB.resetScore();
-    FuelSim.Hub.BLUE_HUB.resetScore();
+    // FuelSim.Hub.RED_HUB.resetScore();
+    // FuelSim.Hub.BLUE_HUB.resetScore();
   }
 
   /** This function is called periodically whilst in simulation. */
@@ -201,16 +204,16 @@ public class Robot extends TimedRobot {
   public void simulationPeriodic() {
     // RobotVisualization.projectileUpdater();
 
-    FuelSim.getInstance().updateSim();
-    FuelSim.getInstance()
-        .toggleAirResistance(SmartDashboard.getBoolean("Air Resistance Toggle", false));
-    FuelSim.Hub.RED_HUB.toggleCountWhenActive(
-        SmartDashboard.getBoolean("Only Count while Active", false));
-    FuelSim.Hub.BLUE_HUB.toggleCountWhenActive(
-        SmartDashboard.getBoolean("Only Count while Active", false));
+    // FuelSim.getInstance().updateSim();
+    // FuelSim.getInstance()
+    //     .toggleAirResistance(SmartDashboard.getBoolean("Air Resistance Toggle", false));
+    // FuelSim.Hub.RED_HUB.toggleCountWhenActive(
+    //     SmartDashboard.getBoolean("Only Count while Active", false));
+    // FuelSim.Hub.BLUE_HUB.toggleCountWhenActive(
+    //     SmartDashboard.getBoolean("Only Count while Active", false));
 
-    SmartDashboard.putNumber("Red Alliance Score", FuelSim.Hub.RED_HUB.getScore());
-    SmartDashboard.putNumber("Blue Alliance Score", FuelSim.Hub.BLUE_HUB.getScore());
+    // SmartDashboard.putNumber("Red Alliance Score", FuelSim.Hub.RED_HUB.getScore());
+    // SmartDashboard.putNumber("Blue Alliance Score", FuelSim.Hub.BLUE_HUB.getScore());
   }
 
   private static final class GcStatsCollector {

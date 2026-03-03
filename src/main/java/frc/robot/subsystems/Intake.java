@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -12,12 +12,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
@@ -26,11 +24,11 @@ public class Intake extends SubsystemBase {
   private final TalonFX armMainMotor;
   private final TalonFX armFollowerMotor;
   private final TalonFX intakeMotor;
-  private final DigitalInput armMagnetSensor;
+  // private final DigitalInput armMagnetSensor;
 
   private boolean wasDeployedLastLoop;
 
-  private final double shakePeriod = 3.53;
+  private final double shakePeriod = 1.0;
 
   private final MotionMagicVoltage motionMagicRequest =
       new MotionMagicVoltage(0).withEnableFOC(true);
@@ -48,16 +46,16 @@ public class Intake extends SubsystemBase {
     armMainMotor = new TalonFX(IntakeConstants.armMainID);
     armFollowerMotor = new TalonFX(IntakeConstants.armFollowerID);
 
-    armMagnetSensor = new DigitalInput(IntakeConstants.armMagnetID);
-
-    armMainMotor.getConfigurator().apply(IntakeConstants.armConfigs);
-    armFollowerMotor.getConfigurator().apply(IntakeConstants.armConfigs);
+    // armMagnetSensor = new DigitalInput(IntakeConstants.armMagnetID);
+    intakeMotor.getConfigurator().apply(IntakeConstants.intakeConfigs);
+    armMainMotor.getConfigurator().apply(IntakeConstants.armMainConfigs);
+    armFollowerMotor.getConfigurator().apply(IntakeConstants.armFollowerConfigs);
 
     armCurrent = armMainMotor.getStatorCurrent();
     armVelocity = armMainMotor.getVelocity();
 
-    armMainMotor.setPosition(0);
-    armFollowerMotor.setPosition(0);
+    armMainMotor.setPosition(IntakeConstants.minPosition);
+    armFollowerMotor.setPosition(IntakeConstants.minPosition);
 
     armMainPosition = armMainMotor.getPosition();
     armFollowerPosition = armFollowerMotor.getPosition();
@@ -105,13 +103,13 @@ public class Intake extends SubsystemBase {
   }
 
   public void moveDownManual() {
-    armMainMotor.set(0.5);
-    armFollowerMotor.set(0.5);
+    armMainMotor.set(0.25);
+    armFollowerMotor.set(0.25);
   }
 
   public void moveUpManual() {
-    armMainMotor.set(0.5);
-    armFollowerMotor.set(0.5);
+    armMainMotor.set(-0.25);
+    armFollowerMotor.set(-0.25);
   }
 
   public void moveUp() {
@@ -146,7 +144,7 @@ public class Intake extends SubsystemBase {
             armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
             armFollowerMotor.setControl(
                 motionMagicRequest.withPosition(IntakeConstants.upPosition));
-            stopIntake();
+            setIntakeSpeed(0);
           }
         })
         .withName("Intake working");
@@ -163,13 +161,13 @@ public class Intake extends SubsystemBase {
               moveDown();
               setIntakeSpeed(IntakeConstants.intakeSpeed);
             }),
-        this::rollersRunning);
+        () -> Math.abs(intakeMotor.get()) > 0.05);
   }
 
   public boolean isIntakeDeployed() {
     // return !armMagnetSensor.get();
-    // return armMainPosition.getValue().gte(IntakeConstants.armDownPositionTolerance);
-    return true; // FOR TESTING IN SIM
+    return armMainPosition.getValue().gte(IntakeConstants.armDownPositionTolerance);
+    // return true; // FOR TESTING IN SIM
   }
 
   public boolean rollersRunning() {
@@ -185,8 +183,41 @@ public class Intake extends SubsystemBase {
     armFollowerMotor.setPosition(0);
   }
 
+  public void setArmMaxPosition() {
+    armMainMotor.setPosition(IntakeConstants.maxPosition);
+    armFollowerMotor.setPosition(IntakeConstants.maxPosition);
+    armMainPosition.refresh();
+    armFollowerPosition.refresh();
+  }
+
   public Command zeroArmCommand() {
-    return new InstantCommand();
+    return Commands.startRun(
+            // run once
+            () -> {
+              armMainMotor.stopMotor();
+              armFollowerMotor.stopMotor();
+
+              armMainMotor.setPosition(0);
+            },
+            // run
+            () -> {
+              armMainMotor.set(IntakeConstants.armZeroSpeed);
+              armFollowerMotor.set(IntakeConstants.armZeroSpeed);
+            })
+        .until(
+            () ->
+                armMainMotor.getStatorCurrent().getValueAsDouble()
+                    > IntakeConstants.armStallCurrent)
+        .finallyDo(
+            () -> {
+              armMainMotor.stopMotor();
+              armFollowerMotor.stopMotor();
+
+              armMainMotor.setPosition(IntakeConstants.maxPosition);
+              armFollowerMotor.setPosition(IntakeConstants.maxPosition);
+
+              // armMainMoo.setControl(motionMagicRequest.withPosition(Degrees.of(25)));
+            });
   }
 
   // public Command zeroArmCommand() {
@@ -224,7 +255,7 @@ public class Intake extends SubsystemBase {
     armFollowerPosition.refresh();
 
     SmartDashboard.putNumber("Intake speed", intakeMotor.get());
-    SmartDashboard.putNumber("Intake Arm Position", armMainPosition.getValue().in(Rotations));
+    SmartDashboard.putNumber("Intake Arm Position", armMainPosition.getValue().in(Degrees));
     SmartDashboard.putBoolean("Intake Arm Deployed", isIntakeDeployed());
   }
 }

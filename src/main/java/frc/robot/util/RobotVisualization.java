@@ -1,7 +1,6 @@
 package frc.robot.util;
 
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.epilogue.Logged;
@@ -61,14 +60,15 @@ public class RobotVisualization {
                 new Rotation3d(0.0, hood.getHoodAngle().in(Radians), 0.0)));
   }
 
-  @Logged(name = "Climber Poses")
-  public Pose3d[] getClimberPose3d() {
-    return new Pose3d[] {
-      new Pose3d(
-          -0.2861912, 0.0635, 0.104775 + climber.getClimberHeight().in(Meters), Rotation3d.kZero),
-      new Pose3d(-0.2861912, 0.0635, 0.104775, Rotation3d.kZero)
-    };
-  }
+  // @Logged(name = "Climber Poses")
+  // public Pose3d[] getClimberPose3d() {
+  //   return new Pose3d[] {
+  //     new Pose3d(
+  //         -0.2861912, 0.0635, 0.104775 + climber.getClimberHeight().in(Meters),
+  // Rotation3d.kZero),
+  //     new Pose3d(-0.2861912, 0.0635, 0.104775, Rotation3d.kZero)
+  //   };
+  // }
 
   @Logged(name = "Fuel Stored")
   public int getFuelStored() {

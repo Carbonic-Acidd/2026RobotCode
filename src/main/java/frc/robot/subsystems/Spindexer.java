@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Amps;
 
+import au.grapplerobotics.LaserCan;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.Debouncer;
@@ -20,6 +21,8 @@ public class Spindexer extends SubsystemBase {
   private TalonFX kickerMotor;
   private Debouncer currentEmptyDebouncer = new Debouncer(1.0);
 
+  private LaserCan kickerLaser;
+
   private StatusSignal<Current> kickerCurrent;
   private StatusSignal<Current> spindexerCurrent;
 
@@ -27,12 +30,25 @@ public class Spindexer extends SubsystemBase {
   public Spindexer() {
     spindexerMotor = new TalonFX(SpindexerConstants.spindexerMotorID);
     kickerMotor = new TalonFX(SpindexerConstants.kickerMotorID);
+    kickerLaser = new LaserCan(SpindexerConstants.kickerLaserID);
 
     spindexerMotor.getConfigurator().apply(SpindexerConstants.spindexerConfigs);
     kickerMotor.getConfigurator().apply(SpindexerConstants.spindexerConfigs);
 
     kickerCurrent = kickerMotor.getStatorCurrent();
     spindexerCurrent = spindexerMotor.getStatorCurrent();
+  }
+
+  public boolean kickerLaserBroken() {
+    LaserCan.Measurement measurement = kickerLaser.getMeasurement();
+
+    if (measurement != null
+        && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT
+        && measurement.distance_mm < 75) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public void stopSpindexerMotor() {
@@ -74,11 +90,11 @@ public class Spindexer extends SubsystemBase {
         });
   }
 
-  public Command reverseBoth() {
+  public Command manualBoth() {
     return run(
         () -> {
-          spindexerMotor.set(SpindexerConstants.reverseSpindexerSpeed);
-          kickerMotor.set(SpindexerConstants.reverseKickerSpeed);
+          spindexerMotor.set(SpindexerConstants.spindexerMotorSpeed);
+          kickerMotor.set(SpindexerConstants.kickerMotorSpeed);
         });
   }
 
@@ -111,6 +127,7 @@ public class Spindexer extends SubsystemBase {
     spindexerCurrent.refresh();
     kickerCurrent.refresh();
 
+    SmartDashboard.putBoolean("Spindexer/Kicker Laser Broken", kickerLaserBroken());
     SmartDashboard.putNumber("Spindexer/Spindexer Current", spindexerCurrent.getValue().in(Amps));
     SmartDashboard.putNumber("Spindexer/Kicker Current", kickerCurrent.getValue().in(Amps));
     SmartDashboard.putBoolean("Spindexer/Spindexer Empty", isEmpty());

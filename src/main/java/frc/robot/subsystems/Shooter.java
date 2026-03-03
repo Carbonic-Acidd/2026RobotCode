@@ -29,11 +29,15 @@ public class Shooter extends SubsystemBase {
     shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);
   }
 
-  public Command reachGoalVelocity(LinearVelocity goalVelocity) {
+  public Command reachGoalVelocityCommand(LinearVelocity goalVelocity) {
     return run(
         () ->
             shooterMotor.setControl(
                 velocityRequest.withVelocity(linearToAngularVelocity(goalVelocity))));
+  }
+
+  public void reachGoalVelocity(LinearVelocity goalVelocity) {
+    shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalVelocity)));
   }
 
   public void stopShooter() {
@@ -65,11 +69,12 @@ public class Shooter extends SubsystemBase {
   }
 
   public boolean shooterAtSetPoint(LinearVelocity goalSpeed) {
-    if(RobotBase.isSimulation()) return true;
+    if (RobotBase.isSimulation()) return true;
+
     LinearVelocity currentSpeed = angularToLinearVelocity(getCurrentVelocity());
 
     return Math.abs(currentSpeed.in(MetersPerSecond) - goalSpeed.in(MetersPerSecond))
-    < ShooterConstants.shooterSpeedTolerance.in(MetersPerSecond);
+        < ShooterConstants.shooterSpeedTolerance.in(MetersPerSecond);
   }
 
   public Command runMotor(double speed) {

@@ -36,11 +36,12 @@ public class AutoClimb extends SequentialCommandGroup {
           return leftAlign ? climbingPoses.get(0) : climbingPoses.get(1);
         };
 
-    addCommands(
-        new RotateToPose(
-                forwardSupplier, strafeSupplier, targetClimbPosition, maxTranslationalSpeed, swerve)
-            .withDeadline(climber.climberUpCommand()),
-        new DriveToPose(swerve, false, targetClimbPosition),
-        climber.climberDownCommand());
+    // addCommands(
+    //     new RotateToPose(
+    //             forwardSupplier, strafeSupplier, targetClimbPosition, maxTranslationalSpeed,
+    // swerve)
+    //         .withDeadline(climber.climberUpCommand()),
+    //     new DriveToPose(swerve, false, targetClimbPosition),
+    //     climber.climberDownCommand());
   }
 }
