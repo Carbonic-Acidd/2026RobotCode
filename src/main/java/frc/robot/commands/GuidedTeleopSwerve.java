@@ -73,6 +73,9 @@ public class GuidedTeleopSwerve extends Command {
 
   private DriveMode currentDriveMode = DriveMode.NormalDrive;
 
+  private Vector<N2> commandedVelocity = new Vector<>(Nat.N2());
+  private Vector<N2> toTarget = new Vector<>(Nat.N2());
+
   public GuidedTeleopSwerve(
       DoubleSupplier forwardSupplier,
       DoubleSupplier strafeSupplier,
@@ -110,11 +113,9 @@ public class GuidedTeleopSwerve extends Command {
             ? swerve.getClosestTrenchPose()
             : swerve.getClosestBumpPose();
 
-    Vector<N2> commandedVelocity = new Vector<>(Nat.N2());
     commandedVelocity.set(0, 0, getForwardSpeed());
     commandedVelocity.set(1, 0, getStrafeSpeed());
 
-    Vector<N2> toTarget = new Vector<>(Nat.N2());
     toTarget.set(0, 0, (flipFactor) * (targetPose.getX() - robotPose.getX()));
     toTarget.set(1, 0, (flipFactor) * (targetPose.getY() - robotPose.getY()));
 

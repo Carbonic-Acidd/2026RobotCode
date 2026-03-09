@@ -21,6 +21,8 @@ public class Spindexer extends SubsystemBase {
   private TalonFX kickerMotor;
   private Debouncer currentEmptyDebouncer = new Debouncer(1.0);
 
+  private int ballCounter = 0;
+
   private LaserCan kickerLaser;
 
   private StatusSignal<Current> kickerCurrent;
@@ -39,12 +41,24 @@ public class Spindexer extends SubsystemBase {
     spindexerCurrent = spindexerMotor.getStatorCurrent();
   }
 
+  public void addBall() {
+    ballCounter++;
+  }
+
+  public void zeroBalls() {
+    ballCounter = 0;
+  }
+
+  public int getBalls() {
+    return ballCounter;
+  }
+
   public boolean kickerLaserBroken() {
     LaserCan.Measurement measurement = kickerLaser.getMeasurement();
 
     if (measurement != null
         && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT
-        && measurement.distance_mm < 75) {
+        && measurement.distance_mm < 45) {
       return true;
     } else {
       return false;
@@ -127,6 +141,7 @@ public class Spindexer extends SubsystemBase {
     spindexerCurrent.refresh();
     kickerCurrent.refresh();
 
+    SmartDashboard.putNumber("Spindexer/Ball Counter", ballCounter);
     SmartDashboard.putBoolean("Spindexer/Kicker Laser Broken", kickerLaserBroken());
     SmartDashboard.putNumber("Spindexer/Spindexer Current", spindexerCurrent.getValue().in(Amps));
     SmartDashboard.putNumber("Spindexer/Kicker Current", kickerCurrent.getValue().in(Amps));

@@ -125,7 +125,7 @@ public class RobotVisualization {
     // once turret is tuned better
     FuelSim.getInstance()
         .launchFuel(
-            shootingParameters.shooterSpeed(),
+            shooter.angularToLinearVelocity(shootingParameters.shooterSpeed()),
             Radians.of(Math.PI / 2).minus(hood.getHoodAngle()),
             swerve.getRobotPose().getRotation().getMeasure().plus(turret.getTurretAngle()),
             TurretConstants.robotToTurret);

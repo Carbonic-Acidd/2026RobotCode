@@ -1,5 +1,5 @@
 {
- "name":"RE_Trench_Depot",
+ "name":"RE_Left_Trench_Depot",
  "version":3,
  "snapshot":{
   "waypoints":[
@@ -37,7 +37,8 @@
     {"x":{"exp":"2.5111184120178223 m", "val":2.5111184120178223}, "y":{"exp":"6.84992790222168 m", "val":6.84992790222168}, "heading":{"exp":"-0.8803499427704813 rad", "val":-0.8803499427704813}, "intervals":24, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"1.9058738946914673 m", "val":1.9058738946914673}, "y":{"exp":"6.189661026000977 m", "val":6.189661026000977}, "heading":{"exp":"-2.749252456584856 rad", "val":-2.749252456584856}, "intervals":17, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
     {"x":{"exp":"1.1172219514846802 m", "val":1.1172219514846802}, "y":{"exp":"5.969572067260742 m", "val":5.969572067260742}, "heading":{"exp":"-180 deg", "val":-3.141592653589793}, "intervals":23, "split":true, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
-    {"x":{"exp":"0.5853403210639954 m", "val":0.5853403210639954}, "y":{"exp":"6.024594306945801 m", "val":6.024594306945801}, "heading":{"exp":"-180 deg", "val":-3.141592653589793}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
+    {"x":{"exp":"0.5853403210639954 m", "val":0.5853403210639954}, "y":{"exp":"6.024594306945801 m", "val":6.024594306945801}, "heading":{"exp":"-180 deg", "val":-3.141592653589793}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false},
+    {"x":{"exp":"2.559929847717285 m", "val":2.559929847717285}, "y":{"exp":"7.09453010559082 m", "val":7.09453010559082}, "heading":{"exp":"0 deg", "val":0.0}, "intervals":40, "split":false, "fixTranslation":true, "fixHeading":true, "overrideIntervals":false}],
   "constraints":[
     {"from":"first", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},
     {"from":"last", "to":null, "data":{"type":"StopPoint", "props":{}}, "enabled":true},

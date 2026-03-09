@@ -33,12 +33,12 @@ public class ShootOnTheMove extends Command {
   private final Swerve swerve;
   private final Spindexer spindexer;
 
-  private Debouncer hoodSetPointDebouncer = new Debouncer(0.1);
-  private Debouncer turretSetPointDebouncer = new Debouncer(0.1);
-  private Debouncer shooterDebouncer = new Debouncer(0.1);
+  private Debouncer hoodSetPointDebouncer = new Debouncer(0.02);
+  private Debouncer turretSetPointDebouncer = new Debouncer(0.02);
+  private Debouncer shooterDebouncer = new Debouncer(0.02);
 
-  private double turretTolerance = 3.53; // deg
-  private double hoodTolerance = 3.53; // deg
+  private double turretTolerance = 6.5; // deg
+  private double hoodTolerance = 1.5; // deg
 
   private LinearFilter accelXFilter = LinearFilter.movingAverage(2);
   private LinearFilter accelYFilter = LinearFilter.movingAverage(2);
@@ -118,10 +118,10 @@ public class ShootOnTheMove extends Command {
     double hoodErrorDeg =
         hood.getHoodAngle().in(Degrees) - shootingParameters.hoodAngle().in(Degrees);
 
-    if (turretSetPointDebouncer.calculate(Math.abs(turretErrorDeg) <= turretTolerance)
+    if ((turretSetPointDebouncer.calculate(Math.abs(turretErrorDeg) <= turretTolerance)
         && hoodSetPointDebouncer.calculate(Math.abs(hoodErrorDeg) <= hoodTolerance)
         && shooterDebouncer.calculate(
-            shooter.shooterAtSetPoint(shootingParameters.shooterSpeed()))) {
+            shooter.shooterAtSetPoint(shootingParameters.shooterSpeed()))) || !scoringMode.getAsBoolean()) {
       if (RobotBase.isSimulation()) { // if sim and ready to shoot
         if (isVisualizationFirstShot
             || ((Timer.getFPGATimestamp() - startTime) > 1 / SimConstants.fuelsPerSecond)) {

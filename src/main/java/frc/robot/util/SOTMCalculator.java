@@ -1,6 +1,6 @@
 package frc.robot.util;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,7 +9,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.TurretConstants;
@@ -22,12 +22,24 @@ public class SOTMCalculator {
   //   public static InterpolatingDoubleTreeMap shooterSpeedMap = SOTMConstants.shooterSpeedMap;
   //   public static InterpolatingDoubleTreeMap timeOfFlightMap = SOTMConstants.timeOfFlightMap;
 
+  // private static double distanceToHoodRegression(double dMeters) {
+  //   return 18.6 * Math.pow(Math.E, 0.0759 * dMeters);
+  // }
+
+  // private static double distanceToShooterRegression(double dMeters) {
+  //   return (16.6 + 9.8 * dMeters) - (0.627 * dMeters * dMeters);
+  // }
+
+  // private static double distanceToTimeRegression(double dMeters) {
+  //   return 0.622 + (0.274 * dMeters) - (0.0193 * dMeters * dMeters);
+  // }
+
   private static Translation2d robotToTurret2d = TurretConstants.robotToTurret.toTranslation2d();
 
   //   public static Time accelTime = Seconds.of(SimConstants.loopPeriodSecs);
 
   public record ShootingParameters(
-      LinearVelocity shooterSpeed,
+      AngularVelocity shooterSpeed,
       Angle turretAngle,
       Angle hoodAngle,
       Translation2d lookAheadPosition) {}
@@ -76,7 +88,7 @@ public class SOTMCalculator {
 
     SmartDashboard.putNumber("SOTM/turretToLookAheadDistance", turretToTargetDistance);
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 20; i++) { // 20
       double offsetX =
           timeOfFlight
               * (turretVelocityX
@@ -105,7 +117,8 @@ public class SOTMCalculator {
 
     Angle turretAngle = turret.fieldAngleToFaceTarget(lookAheadPosition, swerve.getRobotPose());
     Rotation2d hoodAngle = hoodAngleMap.get(turretToTargetDistance);
-    LinearVelocity shooterSpeed = MetersPerSecond.of(shooterSpeedMap.get(turretToTargetDistance));
+    AngularVelocity shooterSpeed =
+        RotationsPerSecond.of(shooterSpeedMap.get(turretToTargetDistance));
 
     return new ShootingParameters(
         shooterSpeed, turretAngle, hoodAngle.getMeasure(), lookAheadPosition);

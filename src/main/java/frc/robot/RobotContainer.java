@@ -7,7 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -108,8 +108,6 @@ public class RobotContainer {
 
   private Debouncer kickerLaserDebouncer = new Debouncer(2.0);
 
-  private int autoBallCount = 0;
-
   Trigger kickerLaserTrigger = new Trigger(() -> spindexer.kickerLaserBroken());
 
   Trigger onLeftSideTrigger = new Trigger(() -> swerve.onLeftSide());
@@ -152,26 +150,29 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "Shoot On The Move",
         new ShootOnTheMove(
-            swerve,
-            turret,
-            hood,
-            shooter,
-            spindexer,
-            AllianceUtil::getHubPose,
-            robotVisualization,
-            () -> true));
-    
+                swerve,
+                turret,
+                hood,
+                shooter,
+                spindexer,
+                AllianceUtil::getHubPose,
+                robotVisualization,
+                () -> true)
+            .asProxy());
+
     NamedCommands.registerCommand(
         "Auto Shoot On The Move",
         new ShootOnTheMove(
-            swerve,
-            turret,
-            hood,
-            shooter,
-            spindexer,
-            AllianceUtil::getHubPose,
-            robotVisualization,
-            () -> true).until(()-> autoBallCount > 7));
+                swerve,
+                turret,
+                hood,
+                shooter,
+                spindexer,
+                AllianceUtil::getHubPose,
+                robotVisualization,
+                () -> true)
+            .until(() -> spindexer.getBalls() > 7)
+            .asProxy());
 
     // NamedCommands.registerCommand(
     //     "Pathfind to Mid-Left Bumper", swerve.pathFindToPose(FieldConstants.midLBumperPose));
@@ -181,20 +182,34 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "FerryOTM",
         new ShootOnTheMove(
-            swerve,
-            turret,
-            hood,
-            shooter,
-            spindexer,
-            ferryPoseSupplier,
-            robotVisualization,
-            () -> false));
+                swerve,
+                turret,
+                hood,
+                shooter,
+                spindexer,
+                ferryPoseSupplier,
+                robotVisualization,
+                () -> false)
+            .asProxy());
 
     NamedCommands.registerCommand(
-        "IntakeUntilFull", Commands.waitUntil(() -> !robotVisualization.canSimIntake()));
+        "IntakeUntilFull", Commands.waitUntil(() -> !robotVisualization.canSimIntake()).asProxy());
 
-    NamedCommands.registerCommand("Start Intake", intake.startIntake());
-    NamedCommands.registerCommand("Stop Intake", intake.stopIntake());
+    NamedCommands.registerCommand(
+        "Zero Intake", intake.runOnce(() -> intake.setZero()).asProxy().ignoringDisable(true));
+    NamedCommands.registerCommand(
+        "Zero Hood", hood.runOnce(() -> hood.zeroHood()).asProxy().ignoringDisable(true));
+
+    NamedCommands.registerCommand("Intake In", intake.intakeToPosition(false).asProxy());
+    NamedCommands.registerCommand("Intake Out", intake.intakeToPosition(true).asProxy());
+
+    NamedCommands.registerCommand("Intake Sequence In", intake.intakeSequence(false).asProxy());
+    NamedCommands.registerCommand("Intake Sequence Out", intake.intakeSequence(true).asProxy());
+
+    NamedCommands.registerCommand("Shake Intake", intake.shakeIntakeCommand().asProxy());
+
+    NamedCommands.registerCommand("Start Intake", intake.startIntake().asProxy());
+    NamedCommands.registerCommand("Stop Intake", intake.stopIntake().asProxy());
 
     NamedCommands.registerCommand(
         "SOTM Until Empty",
@@ -207,11 +222,14 @@ public class RobotContainer {
                 AllianceUtil::getHubPose,
                 robotVisualization,
                 () -> true)
-            .until(() -> robotVisualization.isEmpty()));
+            .until(() -> robotVisualization.isEmpty())
+            .asProxy());
 
     NamedCommands.registerCommand(
         "Shoot",
-        Commands.run(() -> shooter.reachGoalVelocity(MetersPerSecond.of(1))).withTimeout(1));
+        Commands.run(() -> shooter.reachGoalVelocity(RotationsPerSecond.of(1)))
+            .asProxy()
+            .withTimeout(1));
 
     configureDriverBindings();
     configureOperatorBindings();
@@ -233,14 +251,16 @@ public class RobotContainer {
     SmartDashboard.putData(
         "Set Hood Zero", hood.runOnce(() -> hood.zeroHood()).ignoringDisable(true));
 
-    SmartDashboard.putData("Reset Auto Ball Count", Commands.runOnce(()-> autoBallCount = 0));
+    SmartDashboard.putData(
+        "Reset Auto Ball Count",
+        Commands.runOnce(() -> spindexer.zeroBalls()).ignoringDisable(true));
 
     SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
     SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
 
     goalShotTarget = AllianceUtil.getHubPose();
 
-    kickerLaserTrigger.onTrue(Commands.runOnce(()-> autoBallCount++));
+    kickerLaserTrigger.onTrue(Commands.runOnce(() -> spindexer.addBall()));
 
     inAllianceZoneTrigger.onTrue(
         Commands.runOnce(() -> goalShotTarget = AllianceUtil.getHubPose()));
@@ -320,6 +340,23 @@ public class RobotContainer {
             () -> driveOverrideButton.getAsBoolean(),
             swerve));
 
+    // swerve.setDefaultCommand(
+    //     new TeleopSwerve(
+    //         driverController::getLeftY,
+    //         driverController::getLeftX,
+    //         driverController::getRightX,
+    //         () -> {
+    //           if (slowMode.getAsBoolean()) {
+    //             return SwerveConstants.slowModeMaxTranslationalSpeed;
+    //           }
+    //           return SwerveConstants.maxTranslationalSpeed;
+    //         },
+    //         swerve));
+
+    // leftAutoClimbButton.whileTrue(
+    //     new DriveToPose(swerve, false, () ->
+    // AllianceUtil.flipPose(ClimbConstants.leftClimbPose)));
+
     // leftAutoClimbButton.whileTrue(
     //     new AutoClimb(
     //         driverController::getLeftY,
@@ -353,7 +390,7 @@ public class RobotContainer {
     Trigger intakeSequenceButton = operatorController.leftTrigger();
     Trigger intakeRollerButton = operatorController.leftBumper();
     Trigger shakeIntakeButton = operatorController.rightBumper();
-    Trigger zeroButton = operatorController.back().and(operatorController.start());
+    // Trigger zeroButton = operatorController.back().and(operatorController.start());
     Trigger manualSpindexerButton =
         operatorController.start().and(operatorController.back().negate());
     Trigger reverseIntakeButton =
@@ -366,7 +403,9 @@ public class RobotContainer {
     Trigger manualTurretBackward = operatorController.povDown();
     Trigger manualHoodUpButton = operatorController.y();
     Trigger manualHoodDownButton = operatorController.b();
-    Trigger manualShootButton = operatorController.leftStick();
+    Trigger zeroHoodButton = operatorController.leftStick();
+    Trigger zeroArmButton = operatorController.rightStick();
+    // Trigger manualShootButton = operatorController.leftStick();
 
     // (activeHubTrigger.or(() -> canPreShoot))
     //     .and(automatedShootingTrigger)
@@ -383,40 +422,41 @@ public class RobotContainer {
     //             goalShotTargetSupplier,
     //             robotVisualization));
 
-    turret.setDefaultCommand(turret.moveToAngleCommand(Degrees.of(0)));
     hood.setDefaultCommand(hood.moveToAngleCommand(HoodConstants.minAngle));
     shooter.setDefaultCommand(shooter.stopShooterCommand());
+    turret.setDefaultCommand(turret.faceTarget(goalShotTargetSupplier, swerve::getRobotPose));
+    // turret.setDefaultCommand(turret.moveToAngleCommand(Degrees.of(0)));
     spindexer.setDefaultCommand(spindexer.idleReverse());
     // intake.setDefaultCommand(intake.intakeSequence(false));
     // hood.setDefaultCommand(hood.aimForTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
-    // turret.setDefaultCommand(turret.faceTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
-
-    // shootButton.whileTrue(
-    //     new ShootOnTheMove(
-    //         swerve,
-    //         turret,
-    //         hood,
-    //         shooter,
-    //         spindexer,
-    //         goalShotTargetSupplier,
-    //         robotVisualization,
-    //         inAllianceZoneTrigger));
 
     shootButton.whileTrue(
-        Commands.parallel(
-            new ShootOnTheMove(
-                swerve,
-                turret,
-                hood,
-                shooter,
-                spindexer,
-                goalShotTargetSupplier,
-                robotVisualization,
-                inAllianceZoneTrigger),
-            Commands.sequence(
-                Commands.waitUntil(
-                    () -> kickerLaserDebouncer.calculate(!kickerLaserTrigger.getAsBoolean())),
-                intake.shakeIntakeCommand())));
+        new ShootOnTheMove(
+            swerve,
+            turret,
+            hood,
+            shooter,
+            spindexer,
+            goalShotTargetSupplier,
+            robotVisualization,
+            inAllianceZoneTrigger));
+
+    // shootButton.whileTrue(
+    //     Commands.parallel(
+    //         new ShootOnTheMove(
+    //             swerve,
+    //             turret,
+    //             hood,
+    //             shooter,
+    //             spindexer,
+    //             goalShotTargetSupplier,
+    //             robotVisualization,
+    //             inAllianceZoneTrigger),
+    //         Commands.sequence(
+    //             Commands.runOnce(() -> kickerLaserDebouncer.calculate(false)),
+    //             Commands.waitUntil(
+    //                 () -> kickerLaserDebouncer.calculate(!kickerLaserTrigger.getAsBoolean())),
+    //             intake.shakeIntakeCommand())));
 
     manualTurretForward.whileTrue(turret.moveToAngleCommand(Degrees.of(0)));
     manualTurretRight.whileTrue(turret.moveToAngleCommand(Degrees.of(90)));
@@ -431,7 +471,9 @@ public class RobotContainer {
 
     shakeIntakeButton.onTrue(intake.shakeIntakeCommand()).onFalse(intake.intakeSequence(true));
 
-    manualSpindexerButton.whileTrue(spindexer.manualBoth());
+    manualSpindexerButton
+        .whileTrue(spindexer.manualBoth())
+        .onFalse(spindexer.runOnce(() -> spindexer.stopBoth()));
 
     reverseIntakeButton.whileTrue(intake.reverseIntakeRollers()).onFalse(intake.stopIntake());
 
@@ -441,14 +483,20 @@ public class RobotContainer {
     manualHoodUpButton.whileTrue(hood.moveHoodCommand(true)).onFalse(hood.holdPosition());
     manualHoodDownButton.whileTrue(hood.moveHoodCommand(false)).onFalse(hood.holdPosition());
 
-    manualShootButton.whileTrue(
-        shooter.manualInterpolatedShoot(() -> swerve.getTurretToHubMeters()));
+    // manualShootButton.whileTrue(
+    //     shooter.manualInterpolatedShoot(() -> swerve.getTurretToHubMeters()));
 
-    zeroButton.onTrue(
-        turret
-            .resetTurretPosition()
-            .alongWith(intake.zeroArmCommand())
-            .alongWith(hood.zeroHoodCommand()));
+    // zeroButton.onTrue(
+    //     turret
+    //         .resetTurretPosition()
+    //         .alongWith(intake.zeroArmCommand())
+    //         .alongWith(hood.zeroHoodCommand()));
+    zeroHoodButton
+        .whileTrue(hood.moveHoodCommand(false))
+        .onFalse(hood.runOnce(() -> hood.zeroHood()));
+    zeroArmButton
+        .whileTrue(intake.run(() -> intake.moveDownManual()))
+        .onFalse(intake.runOnce(() -> intake.setZero()));
   }
 
   private void configureAutoChooser() {

@@ -192,6 +192,8 @@ public class Turret extends SubsystemBase {
             TurretConstants.MIN_ANGLE.in(Degrees),
             TurretConstants.MAX_ANGLE.in(Degrees));
 
+    // if (candidate > 85 && candidate < 95) candidate +=3;
+
     return Degrees.of(candidate);
   }
 

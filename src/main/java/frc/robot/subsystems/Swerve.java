@@ -578,13 +578,29 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
     return AllianceUtil.getHubPose().getTranslation().getDistance(turretPose);
   }
 
+  public double getTurretToFerryMeters() {
+    Translation2d turretPose =
+        stateCache
+            .Pose
+            .getTranslation()
+            .plus(
+                TurretConstants.robotToTurretTransform
+                    .getTranslation()
+                    .rotateBy(stateCache.Pose.getRotation()));
+
+    return FieldConstants.blueFerryPoints.get(0).getTranslation().getDistance(turretPose);
+  }
+
   @Override
   public void periodic() {
     double startTime = Timer.getFPGATimestamp();
     stateCache = getState();
     SmartDashboard.putNumber("Swerve/Gyro Position", getPigeonRotation().getDegrees());
 
-    SmartDashboard.putNumber("Testing/Distance To Hub", getTurretToHubMeters());
+    SmartDashboard.putNumber(
+        "Testing/Distance To Hub", (getTurretToHubMeters()));
+
+    SmartDashboard.putNumber("Testing/Distance To Ferry", getTurretToFerryMeters());
 
     latestArducamLeftResult = arducamLeft.getAllUnreadResults();
     latestArducamRightResult = arducamRight.getAllUnreadResults();

@@ -29,20 +29,16 @@ public class Shooter extends SubsystemBase {
     shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);
   }
 
-  public Command reachGoalVelocityCommand(LinearVelocity goalVelocity) {
-    return run(
-        () ->
-            shooterMotor.setControl(
-                velocityRequest.withVelocity(linearToAngularVelocity(goalVelocity))));
+  public Command reachGoalVelocityCommand(AngularVelocity goalVelocity) {
+    return run(() -> shooterMotor.setControl(velocityRequest.withVelocity(goalVelocity)));
   }
 
-  public void reachGoalVelocity(LinearVelocity goalVelocity) {
-    shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalVelocity)));
+  public void reachGoalVelocity(AngularVelocity goalVelocity) {
+    shooterMotor.setControl(velocityRequest.withVelocity(goalVelocity));
   }
 
   public void stopShooter() {
-    shooterMotor.setControl(
-        velocityRequest.withVelocity(linearToAngularVelocity(MetersPerSecond.of(0))));
+    shooterMotor.setControl(velocityRequest.withVelocity(RotationsPerSecond.of(0)));
   }
 
   public Command stopShooterCommand() {
@@ -68,13 +64,13 @@ public class Shooter extends SubsystemBase {
     return shooterMotor.getVelocity().getValue();
   }
 
-  public boolean shooterAtSetPoint(LinearVelocity goalSpeed) {
+  public boolean shooterAtSetPoint(AngularVelocity goalSpeed) {
     if (RobotBase.isSimulation()) return true;
 
-    LinearVelocity currentSpeed = angularToLinearVelocity(getCurrentVelocity());
+    AngularVelocity currentSpeed = getCurrentVelocity();
 
-    return Math.abs(currentSpeed.in(MetersPerSecond) - goalSpeed.in(MetersPerSecond))
-        < ShooterConstants.shooterSpeedTolerance.in(MetersPerSecond);
+    return Math.abs(currentSpeed.in(RotationsPerSecond) - goalSpeed.in(RotationsPerSecond))
+        < ShooterConstants.shooterSpeedTolerance.in(RotationsPerSecond);
   }
 
   public Command runMotor(double speed) {
@@ -101,14 +97,12 @@ public class Shooter extends SubsystemBase {
     // shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalSpeed)));
 
     // shooterMotor.setControl(
-    //     velocityRequest.withVelocity(
-    //         linearToAngularVelocity(
-    //             MetersPerSecond.of(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)))));
+    //     velocityRequest.withVelocity(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)));
 
     SmartDashboard.putNumber(
         "Shooter/Current Angular Velocity", getCurrentVelocity().in(RotationsPerSecond));
-    SmartDashboard.putNumber(
-        "Shooter/Current Linear Velocity",
-        angularToLinearVelocity(getCurrentVelocity()).in(MetersPerSecond));
+    // SmartDashboard.putNumber(
+    //     "Shooter/Current Linear Velocity",
+    //     angularToLinearVelocity(getCurrentVelocity()).in(MetersPerSecond));
   }
 }
