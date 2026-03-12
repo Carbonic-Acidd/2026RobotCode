@@ -110,8 +110,10 @@ public class ShootOnTheMove extends Command {
             scoringMode.getAsBoolean());
 
     Angle compensatedAngle = shootingParameters.turretAngle();
-    
-    if((compensatedAngle.in(Degrees) < -20) && (compensatedAngle.in(Degrees) > -100) && (swerve.getTurretToHubMeters() < 4.2)) {
+
+    if ((compensatedAngle.in(Degrees) < -20)
+        && (compensatedAngle.in(Degrees) > -100)
+        && (swerve.getTurretToHubMeters() < 4.2)) {
       compensatedAngle = compensatedAngle.minus(Degrees.of(6.7));
     }
 

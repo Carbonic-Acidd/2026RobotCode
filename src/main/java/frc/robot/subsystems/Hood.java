@@ -185,6 +185,10 @@ public class Hood extends SubsystemBase {
         .withName("Move Hood to Angle");
   }
 
+  public Command maxPosition() {
+    return runOnce(() -> hoodMotor.setPosition(HoodConstants.maxAngle));
+  }
+
   public Command holdPosition() {
     return startRun(
             () -> {

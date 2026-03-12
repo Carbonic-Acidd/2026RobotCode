@@ -332,19 +332,6 @@ public class RobotContainer {
 
     resetHeadingButton.onTrue(swerve.runOnce(swerve::seedFieldCentric).ignoringDisable(true));
 
-    driverController
-        .rightTrigger()
-        .whileTrue(
-            new ShootOnTheMove(
-                swerve,
-                turret,
-                hood,
-                shooter,
-                spindexer,
-                goalShotTargetSupplier,
-                robotVisualization,
-                inAllianceZoneTrigger));
-
     swerve.setDefaultCommand(
         new GuidedTeleopSwerve(
             driverController::getLeftY,
@@ -511,11 +498,20 @@ public class RobotContainer {
     //         .alongWith(intake.zeroArmCommand())
     //         .alongWith(hood.zeroHoodCommand()));
     zeroHoodButton
-        .whileTrue(hood.moveHoodCommand(false))
-        .onFalse(hood.runOnce(() -> hood.zeroHood()));
+        .whileTrue(Commands.sequence(hood.maxPosition(), hood.moveHoodCommand(false)))
+        .onFalse(
+            Commands.sequence(
+                hood.stop(), Commands.waitSeconds(1), hood.runOnce(() -> hood.zeroHood())));
+
     zeroArmButton
-        .whileTrue(intake.run(() -> intake.moveDownManual()))
-        .onFalse(intake.runOnce(() -> intake.setZero()));
+        .whileTrue(
+            Commands.sequence(
+                intake.runOnce(() -> intake.setZero()), intake.run(() -> intake.moveDownManual())))
+        .onFalse(
+            Commands.sequence(
+                intake.stopArm(),
+                Commands.waitSeconds(1),
+                intake.runOnce(() -> intake.setArmMaxPosition())));
   }
 
   private void configureAutoChooser() {

@@ -191,6 +191,12 @@
           "data": {
             "pathName": "benautoDepo.4"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop Swerve"
+          }
         }
       ]
     }
