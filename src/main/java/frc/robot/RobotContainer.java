@@ -15,8 +15,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -106,6 +107,8 @@ public class RobotContainer {
   private final FuelSim fuelInstance = FuelSim.getInstance();
 
   private final SwerveTelemetry swerveTelemetry = new SwerveTelemetry();
+
+  private final PowerDistribution powerDistribution = new PowerDistribution();
 
   private Debouncer kickerLaserDebouncer = new Debouncer(2.0);
 
@@ -250,6 +253,8 @@ public class RobotContainer {
       configureFuelSim();
     }
 
+    SmartDashboard.putData("Power Distribution", powerDistribution);
+
     SmartDashboard.putData(
         "Set Arm Down", intake.runOnce(() -> intake.setArmMaxPosition()).ignoringDisable(true));
     SmartDashboard.putData(
@@ -285,8 +290,14 @@ public class RobotContainer {
 
     preShiftShoot.onTrue(Commands.runOnce(() -> canPreShoot = true));
     activeHubTrigger.onFalse(Commands.runOnce(() -> canPreShoot = false));
-    shiftEndingTrigger.onTrue(driverController.rumbleFor(RumbleType.kBothRumble, 1.0, 3).onlyIf(()-> DriverStation.isTeleop()));
-    shiftEndingTrigger.onTrue(operatorController.rumbleFor(RumbleType.kBothRumble, 1.0, 3).onlyIf(()-> DriverStation.isTeleop()));
+    shiftEndingTrigger.onTrue(
+        driverController
+            .rumbleFor(RumbleType.kBothRumble, 1.0, 3)
+            .onlyIf(() -> DriverStation.isTeleop()));
+    shiftEndingTrigger.onTrue(
+        operatorController
+            .rumbleFor(RumbleType.kBothRumble, 1.0, 3)
+            .onlyIf(() -> DriverStation.isTeleop()));
   }
 
   private void configureFuelSim() {
