@@ -23,7 +23,7 @@ public class Shooter extends SubsystemBase {
   private TalonFX shooterMotor = new TalonFX(ShooterConstants.shooterMotorID);
 
   private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
-  private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withEnableFOC(true);
 
   public Shooter() {
     shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);
@@ -64,13 +64,13 @@ public class Shooter extends SubsystemBase {
     return shooterMotor.getVelocity().getValue();
   }
 
-  public boolean shooterAtSetPoint(AngularVelocity goalSpeed) {
+  public boolean shooterAtSetPoint(AngularVelocity goalSpeed, AngularVelocity tolerance) {
     if (RobotBase.isSimulation()) return true;
 
     AngularVelocity currentSpeed = getCurrentVelocity();
 
     return Math.abs(currentSpeed.in(RotationsPerSecond) - goalSpeed.in(RotationsPerSecond))
-        < ShooterConstants.shooterSpeedTolerance.in(RotationsPerSecond);
+        < tolerance.in(RotationsPerSecond);
   }
 
   public Command runMotor(double speed) {

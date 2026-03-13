@@ -163,10 +163,11 @@ public final class Constants {
       hoodAngleMapScoring.put(3.315, Rotation2d.fromDegrees(24.10));
       hoodAngleMapScoring.put(5.207, Rotation2d.fromDegrees(27.23));
 
-      shooterSpeedMapScoring.put(1.777, 32.51);
-      shooterSpeedMapScoring.put(2.44, 35.61);
+      //   shooterSpeedMapScoring.put(1.777, 34.51);
+      //   shooterSpeedMapScoring.put(2.44, 37.22);
+
       shooterSpeedMapScoring.put(3.28, 41.11);
-      shooterSpeedMapScoring.put(3.805, 41.11);
+      shooterSpeedMapScoring.put(3.805, 42.11);
       shooterSpeedMapScoring.put(4.34, 47.80);
       shooterSpeedMapScoring.put(5.272, 51.14);
       shooterSpeedMapScoring.put(5.478, 51.14);
@@ -179,8 +180,8 @@ public final class Constants {
       shooterSpeedMapScoring.put(3.315, 43.74);
       shooterSpeedMapScoring.put(5.312075, 51.14);
 
-      timeOfFlightMapScoring.put(1.777, 1.1);
-      timeOfFlightMapScoring.put(2.44, 1.12);
+      //   timeOfFlightMapScoring.put(1.777, 1.1);
+      //   timeOfFlightMapScoring.put(2.44, 1.12);
       timeOfFlightMapScoring.put(3.28, 1.3);
       timeOfFlightMapScoring.put(3.805, 1.33);
       timeOfFlightMapScoring.put(4.34, 1.44);
@@ -210,8 +211,8 @@ public final class Constants {
       //   hoodAngleMapScoring.put(5.501, Rotation2d.fromDegrees(25.82));
       //   hoodAngleMapScoring.put(5.848, Rotation2d.fromDegrees(26.12));
 
-      shooterSpeedMapScoring.put(1.667, 34.18);
-      shooterSpeedMapScoring.put(2.14, 36.14);
+      shooterSpeedMapScoring.put(1.667, 36.18);
+      shooterSpeedMapScoring.put(2.14, 38.14);
       shooterSpeedMapScoring.put(2.412, 40.53);
       shooterSpeedMapScoring.put(2.735, 41.02);
       shooterSpeedMapScoring.put(3.046, 41.99);
@@ -527,10 +528,14 @@ public final class Constants {
 
   public static class FieldConstants {
     public static final String aprilTagJson = "2026-rebuilt-welded";
-    public static final String regalEagleAprilTagJson = "2026RegalEagleTags";
+    public static final String regalEagleAprilTagJson = "2026RegalEagle";
+    public static final String fingerLakesAprilTagJson = "2026FingerLakes";
 
     public static final Path aprilTagJsonPath =
-        Path.of(Filesystem.getDeployDirectory().getPath(), "apriltags", aprilTagJson + ".json");
+        Path.of(
+            Filesystem.getDeployDirectory().getPath(),
+            "apriltags",
+            fingerLakesAprilTagJson + ".json");
 
     public static AprilTagFieldLayout aprilTagLayout;
 
@@ -827,10 +832,10 @@ public final class Constants {
   public static class ShooterConstants {
     public static final int shooterMotorID = 24;
 
-    public static final double shooterGearRatio = 1;
+    public static final double shooterGearRatio = 1.0;
     public static final Distance flyWheelRadius = Inches.of(2.0);
 
-    public static final AngularVelocity shooterSpeedTolerance = RotationsPerSecond.of(10);
+    // public static final AngularVelocity shooterSpeedTolerance = RotationsPerSecond.of(10);
 
     public static final AngularAcceleration motionMagicAcceleration =
         (RadiansPerSecond.of(15 / (flyWheelRadius).in(Meters)).div(Seconds.of(.5)));
@@ -852,6 +857,14 @@ public final class Constants {
             .withKD(0.01) // 0.02
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
+    public static final Slot0Configs slot340Configs =
+        new Slot0Configs()
+            .withKS(0.0)
+            .withKV(0.129)
+            .withKP(0.35)
+            .withKI(0.0)
+            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
+
     public static final FeedbackConfigs feedbackConfigs =
         new FeedbackConfigs().withSensorToMechanismRatio(shooterGearRatio);
 
@@ -861,7 +874,7 @@ public final class Constants {
                 InvertedValue.CounterClockwise_Positive) // needs to spin left when wires up
             .withNeutralMode(NeutralModeValue.Coast);
     public static final CurrentLimitsConfigs currentLimitConfigs =
-        new CurrentLimitsConfigs().withSupplyCurrentLimit(48).withSupplyCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withSupplyCurrentLimit(58).withSupplyCurrentLimitEnable(true);
 
     public static final TalonFXConfiguration shooterConfigs =
         new TalonFXConfiguration()

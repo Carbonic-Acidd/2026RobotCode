@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -240,8 +241,10 @@ public class GuidedTeleopSwerve extends Command {
     // also ignore dot product if we are in normal drive
 
     DriveMode effectiveDriveMode =
-        (manualOverrideSupplier.getAsBoolean())
-                || (dotProduct < 0.10) // only lock if in trying to drive in that direction
+        ((manualOverrideSupplier.getAsBoolean())
+                || (dotProduct < 0.10)
+                || (DriverStation
+                    .isAutonomous())) // only lock if in trying to drive in that direction
             ? DriveMode.NormalDrive
             : currentDriveMode;
 

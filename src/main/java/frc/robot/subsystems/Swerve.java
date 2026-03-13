@@ -843,7 +843,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
         arducamLeftDistCoeffs,
         VisionConstants.arducamLeftTransform,
         Units.inchesToMeters(3.0),
-        Units.inchesToMeters(2.5),
+        Units.inchesToMeters(2.0),
         1);
 
     updateVisionPoses(
@@ -853,7 +853,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
         arducamRightDistCoeffs,
         VisionConstants.arducamRightTransform,
         Units.inchesToMeters(3.0),
-        Units.inchesToMeters(2.5),
+        Units.inchesToMeters(2.0),
         1);
 
     updateVisionPoses(
@@ -863,7 +863,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
         arducamBackLeftDistCoeffs,
         VisionConstants.arducamBackLeftTransform,
         Units.inchesToMeters(3.0),
-        Units.inchesToMeters(2.5),
+        Units.inchesToMeters(2.0),
         1);
 
     updateVisionPoses(
@@ -873,7 +873,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
         arducamBackRightDistCoeffs,
         VisionConstants.arducamBackRightTransform,
         Units.inchesToMeters(3.0),
-        Units.inchesToMeters(2.5),
+        Units.inchesToMeters(2.0),
         1);
 
     Collections.sort(poseEstimates);
@@ -889,9 +889,11 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
   private Vector<N3> getVisionStdDevs(
       int tagCount, double averageDistance, double baseStandardDev) {
     double stdDevScale = 1 + (averageDistance * averageDistance) / 30;
+    double radianTrust = Double.POSITIVE_INFINITY;
+    if (tagCount > 1) radianTrust = Units.degreesToRadians(5);
 
     return VecBuilder.fill(
-        baseStandardDev * stdDevScale, baseStandardDev * stdDevScale, Double.POSITIVE_INFINITY);
+        baseStandardDev * stdDevScale, baseStandardDev * stdDevScale, radianTrust);
   }
 
   private boolean isOutOfBounds(Pose3d visionPose) {

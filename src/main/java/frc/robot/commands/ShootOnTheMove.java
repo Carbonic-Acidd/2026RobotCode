@@ -5,12 +5,15 @@
 package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,6 +43,8 @@ public class ShootOnTheMove extends Command {
 
   private double turretTolerance = 10.0; // deg
   private double hoodTolerance = 2.0; // deg
+  private AngularVelocity shooterScoringTolerance = RotationsPerSecond.of(4);
+  private AngularVelocity shooterFerryingTolerance = RotationsPerSecond.of(10);
 
   private LinearFilter accelXFilter = LinearFilter.movingAverage(2);
   private LinearFilter accelYFilter = LinearFilter.movingAverage(2);
@@ -111,27 +116,32 @@ public class ShootOnTheMove extends Command {
 
     Angle compensatedAngle = shootingParameters.turretAngle();
 
-    if ((compensatedAngle.in(Degrees) < -20)
-        && (compensatedAngle.in(Degrees) > -100)
-        && (swerve.getTurretToHubMeters() < 4.2)) {
-      compensatedAngle = compensatedAngle.minus(Degrees.of(6.7));
+    if ((compensatedAngle.in(Degrees) < -20) && (compensatedAngle.in(Degrees) > -100)) {
+      double distance = swerve.getTurretToHubMeters();
+      double angleFix = MathUtil.clamp(25.0 - (5 * distance), 0.0, 25.0);
+      compensatedAngle = compensatedAngle.minus(Degrees.of(angleFix));
+      // compensatedAngle =
+      //     compensatedAngle.minus(Degrees.of(SmartDashboard.getNumber("Dynamic Turret Angle",
+      // 0)));
     }
 
-    turret.moveToAngle(shootingParameters.turretAngle());
+    turret.moveToAngle(compensatedAngle);
     hood.moveToAngle(shootingParameters.hoodAngle());
     shooter.reachGoalVelocity(shootingParameters.shooterSpeed());
     swerve.setLookAheadPose(shootingParameters.lookAheadPosition());
 
-    double turretErrorDeg =
-        turret.getTurretAngle().in(Degrees) - shootingParameters.turretAngle().in(Degrees);
+    double turretErrorDeg = turret.getTurretAngle().in(Degrees) - compensatedAngle.in(Degrees);
     double hoodErrorDeg =
         hood.getHoodAngle().in(Degrees) - shootingParameters.hoodAngle().in(Degrees);
 
     if ((turretSetPointDebouncer.calculate(Math.abs(turretErrorDeg) <= turretTolerance)
             && hoodSetPointDebouncer.calculate(Math.abs(hoodErrorDeg) <= hoodTolerance)
             && shooterDebouncer.calculate(
-                shooter.shooterAtSetPoint(shootingParameters.shooterSpeed())))
-        || !scoringMode.getAsBoolean()) {
+                shooter.shooterAtSetPoint(
+                    shootingParameters.shooterSpeed(), shooterScoringTolerance)))
+        || (!scoringMode.getAsBoolean()
+            && shooter.shooterAtSetPoint(
+                shootingParameters.shooterSpeed(), shooterFerryingTolerance))) {
       if (RobotBase.isSimulation()) { // if sim and ready to shoot
         if (isVisualizationFirstShot
             || ((Timer.getFPGATimestamp() - startTime) > 1 / SimConstants.fuelsPerSecond)) {

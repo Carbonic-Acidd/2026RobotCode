@@ -16,6 +16,7 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -261,9 +262,9 @@ public class RobotContainer {
         "Reset Auto Ball Count",
         Commands.runOnce(() -> spindexer.zeroBalls()).ignoringDisable(true));
 
-    SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
-    SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
-
+    // SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
+    // SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
+    // SmartDashboard.putNumber("Dynamic Turret Angle", 0);
     goalShotTarget = AllianceUtil.getHubPose();
 
     kickerLaserTrigger.onTrue(Commands.runOnce(() -> spindexer.addBall()));
@@ -284,8 +285,8 @@ public class RobotContainer {
 
     preShiftShoot.onTrue(Commands.runOnce(() -> canPreShoot = true));
     activeHubTrigger.onFalse(Commands.runOnce(() -> canPreShoot = false));
-    shiftEndingTrigger.onTrue(driverController.rumbleFor(RumbleType.kBothRumble, 1.0, 3));
-    shiftEndingTrigger.onTrue(operatorController.rumbleFor(RumbleType.kBothRumble, 1.0, 3));
+    shiftEndingTrigger.onTrue(driverController.rumbleFor(RumbleType.kBothRumble, 1.0, 3).onlyIf(()-> DriverStation.isTeleop()));
+    shiftEndingTrigger.onTrue(operatorController.rumbleFor(RumbleType.kBothRumble, 1.0, 3).onlyIf(()-> DriverStation.isTeleop()));
   }
 
   private void configureFuelSim() {
