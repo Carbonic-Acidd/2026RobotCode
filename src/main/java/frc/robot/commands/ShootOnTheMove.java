@@ -42,12 +42,14 @@ public class ShootOnTheMove extends Command {
   private Debouncer shooterDebouncer = new Debouncer(0.02);
 
   private double turretTolerance = 10.0; // deg
-  private double hoodTolerance = 2.0; // deg
-  private AngularVelocity shooterScoringTolerance = RotationsPerSecond.of(4);
+  private double hoodTolerance = 3.0; // deg
+  private AngularVelocity shooterScoringTolerance = RotationsPerSecond.of(10);
   private AngularVelocity shooterFerryingTolerance = RotationsPerSecond.of(10);
 
   private LinearFilter accelXFilter = LinearFilter.movingAverage(2);
   private LinearFilter accelYFilter = LinearFilter.movingAverage(2);
+
+  private double shooterOffset = 0.53;
 
   private ChassisSpeeds previousFieldSpeeds = new ChassisSpeeds();
 
@@ -125,9 +127,18 @@ public class ShootOnTheMove extends Command {
       // 0)));
     }
 
+    AngularVelocity compensatedVelocity = shootingParameters.shooterSpeed();
+
+    // double constant2 = SmartDashboard.getNumber("Dynamic SHooter Extra SPeed", 0);
+
+    compensatedVelocity =
+        RotationsPerSecond.of(
+            compensatedVelocity.in(RotationsPerSecond)
+                + shooterOffset / 100 * Math.abs(compensatedAngle.in(Degrees)));
+
     turret.moveToAngle(compensatedAngle);
     hood.moveToAngle(shootingParameters.hoodAngle());
-    shooter.reachGoalVelocity(shootingParameters.shooterSpeed());
+    shooter.reachGoalVelocity(compensatedVelocity);
     swerve.setLookAheadPose(shootingParameters.lookAheadPosition());
 
     double turretErrorDeg = turret.getTurretAngle().in(Degrees) - compensatedAngle.in(Degrees);
@@ -137,11 +148,9 @@ public class ShootOnTheMove extends Command {
     if ((turretSetPointDebouncer.calculate(Math.abs(turretErrorDeg) <= turretTolerance)
             && hoodSetPointDebouncer.calculate(Math.abs(hoodErrorDeg) <= hoodTolerance)
             && shooterDebouncer.calculate(
-                shooter.shooterAtSetPoint(
-                    shootingParameters.shooterSpeed(), shooterScoringTolerance)))
+                shooter.shooterAtSetPoint(compensatedVelocity, shooterScoringTolerance)))
         || (!scoringMode.getAsBoolean()
-            && shooter.shooterAtSetPoint(
-                shootingParameters.shooterSpeed(), shooterFerryingTolerance))) {
+            && shooter.shooterAtSetPoint(compensatedVelocity, shooterFerryingTolerance))) {
       if (RobotBase.isSimulation()) { // if sim and ready to shoot
         if (isVisualizationFirstShot
             || ((Timer.getFPGATimestamp() - startTime) > 1 / SimConstants.fuelsPerSecond)) {
@@ -155,7 +164,8 @@ public class ShootOnTheMove extends Command {
       }
 
     } else {
-      spindexer.stopBoth();
+      spindexer.decide(startTime);
+      spindexer.stopSpindexerMotor();
     }
   }
 

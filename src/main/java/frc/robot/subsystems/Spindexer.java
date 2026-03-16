@@ -11,6 +11,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -84,6 +86,17 @@ public class Spindexer extends SubsystemBase {
   public boolean currentSaysEmpty() {
     return currentEmptyDebouncer.calculate(
         spindexerCurrent.getValue().in(Amps) < 9.0); // random number need to test
+  }
+
+  public void decide(double startTime) {
+    if (Timer.getFPGATimestamp() - startTime > 1.5 || DriverStation.isAutonomous()) {
+      spindexerMotor.stopMotor();
+      kickerMotor.set(SpindexerConstants.kickerMotorSpeed);
+
+    } else {
+      spindexerMotor.stopMotor();
+      kickerMotor.stopMotor();
+    }
   }
 
   public void runBoth() {

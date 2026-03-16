@@ -270,6 +270,8 @@ public class RobotContainer {
     // SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
     // SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
     // SmartDashboard.putNumber("Dynamic Turret Angle", 0);
+    SmartDashboard.putNumber("Dynamic SHooter Extra SPeed", 0);
+
     goalShotTarget = AllianceUtil.getHubPose();
 
     kickerLaserTrigger.onTrue(Commands.runOnce(() -> spindexer.addBall()));

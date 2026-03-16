@@ -71,7 +71,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 1.5
+                        "waitTime": 1.25
                       }
                     },
                     {
@@ -137,9 +137,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "benautoDepo.3"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "benautoDepo.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Sequence Out"
+                }
+              }
+            ]
           }
         },
         {
@@ -187,9 +200,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "benautoDepo.4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "benautoDepo.4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake Sequence Out"
+                }
+              }
+            ]
           }
         },
         {

@@ -23,7 +23,7 @@ public class Shooter extends SubsystemBase {
   private TalonFX shooterMotor = new TalonFX(ShooterConstants.shooterMotorID);
 
   private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
-  private final VelocityVoltage velocityRequest = new VelocityVoltage(0).withEnableFOC(true);
+  private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
   public Shooter() {
     shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);

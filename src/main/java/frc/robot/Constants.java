@@ -361,7 +361,7 @@ public final class Constants {
     public static final double armGearRatio = 60;
     // 111.182298 - 15.025 = 96;
     public static final Angle minPosition = Degrees.of(0.0);
-    public static final Angle maxPosition = Degrees.of(97.57298);
+    public static final Angle maxPosition = Degrees.of(95.57298); // 97.57298
 
     public static final Angle downPosition = maxPosition;
     public static final Angle upPosition = minPosition;
@@ -682,12 +682,12 @@ public final class Constants {
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.09)
+            .withKS(0.20)
             .withKV(0.020)
             .withKA(0.007)
-            .withKP(140.3) // 1000.3
+            .withKP(250.3) // 1000.3
             .withKI(0.00)
-            .withKD(0.45) // 13.53
+            .withKD(0.0) // 13.53
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
     public static final FeedbackConfigs feedbackConfigs =
@@ -849,12 +849,12 @@ public final class Constants {
 
     public static final Slot0Configs slot0Configs =
         new Slot0Configs()
-            .withKS(0.164)
-            .withKV(0.124)
-            .withKA(0.018)
-            .withKP(0.147) // 0.15
-            .withKI(0.0)
-            .withKD(0.01) // 0.02
+            .withKS(0.164) // 0.164
+            .withKV(0.124) // 0.124
+            .withKA(0.018) // 0.018
+            .withKP(0.147) // 0.147
+            .withKI(0.0) // 0.0
+            .withKD(0.01) // 0.01
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign);
 
     public static final Slot0Configs slot340Configs =
@@ -874,7 +874,7 @@ public final class Constants {
                 InvertedValue.CounterClockwise_Positive) // needs to spin left when wires up
             .withNeutralMode(NeutralModeValue.Coast);
     public static final CurrentLimitsConfigs currentLimitConfigs =
-        new CurrentLimitsConfigs().withSupplyCurrentLimit(58).withSupplyCurrentLimitEnable(true);
+        new CurrentLimitsConfigs().withSupplyCurrentLimit(48).withSupplyCurrentLimitEnable(true);
 
     public static final TalonFXConfiguration shooterConfigs =
         new TalonFXConfiguration()
