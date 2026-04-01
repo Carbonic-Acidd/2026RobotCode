@@ -267,10 +267,13 @@ public class RobotContainer {
         "Reset Auto Ball Count",
         Commands.runOnce(() -> spindexer.zeroBalls()).ignoringDisable(true));
 
-    // SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
-    // SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
+    SmartDashboard.putNumber("Dynamic Shooter Speed", 0);
+    SmartDashboard.putNumber("Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees));
     // SmartDashboard.putNumber("Dynamic Turret Angle", 0);
     SmartDashboard.putNumber("Dynamic SHooter Extra SPeed", 0);
+
+    SmartDashboard.putNumber("Dynamic Shooter KP", 0);
+    SmartDashboard.putNumber("Dynamic Shooter KV", 0);
 
     goalShotTarget = AllianceUtil.getHubPose();
 
@@ -360,6 +363,13 @@ public class RobotContainer {
             () -> driveOverrideButton.getAsBoolean(),
             swerve));
 
+    // driverController.a().whileTrue(shooter.newConfigs());
+
+    // driverController
+    //     .b()
+    //     .whileTrue(shooter.reachDynamicVelocity())
+    //     .onFalse(shooter.stopShooterCommand());
+
     // swerve.setDefaultCommand(
     //     new TeleopSwerve(
     //         driverController::getLeftY,
@@ -410,7 +420,7 @@ public class RobotContainer {
     Trigger intakeSequenceButton = operatorController.leftTrigger();
     Trigger intakeRollerButton = operatorController.leftBumper();
     Trigger shakeIntakeButton = operatorController.rightBumper();
-    // Trigger zeroButton = operatorController.back().and(operatorController.start());
+    // Trigger zeroButton = operat1 xcssxszorController.back().and(operatorController.start());
     Trigger manualSpindexerButton =
         operatorController.start().and(operatorController.back().negate());
     Trigger reverseIntakeButton =
@@ -442,11 +452,14 @@ public class RobotContainer {
     //             goalShotTargetSupplier,
     //             robotVisualization));
 
-    hood.setDefaultCommand(hood.moveToAngleCommand(HoodConstants.minAngle));
-    shooter.setDefaultCommand(shooter.stopShooterCommand());
+    if (!Constants.tuningMode) {
+      hood.setDefaultCommand(hood.moveToAngleCommand(HoodConstants.minAngle));
+      shooter.setDefaultCommand(shooter.stopShooterCommand());
+    }
     turret.setDefaultCommand(turret.faceTarget(goalShotTargetSupplier, swerve::getRobotPose));
-    // turret.setDefaultCommand(turret.moveToAngleCommand(Degrees.of(0)));
+
     spindexer.setDefaultCommand(spindexer.idleReverse());
+
     // intake.setDefaultCommand(intake.intakeSequence(false));
     // hood.setDefaultCommand(hood.aimForTarget(AllianceUtil::getHubPose, swerve::getRobotPose));
 
@@ -492,7 +505,7 @@ public class RobotContainer {
     shakeIntakeButton.onTrue(intake.shakeIntakeCommand()).onFalse(intake.intakeSequence(true));
 
     manualSpindexerButton
-        .whileTrue(spindexer.manualBoth())
+        .whileTrue((Constants.tuningMode) ? spindexer.manualBoth() : spindexer.manualReverse())
         .onFalse(spindexer.runOnce(() -> spindexer.stopBoth()));
 
     reverseIntakeButton.whileTrue(intake.reverseIntakeRollers()).onFalse(intake.stopIntake());

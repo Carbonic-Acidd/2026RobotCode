@@ -7,7 +7,6 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -118,23 +117,29 @@ public class ShootOnTheMove extends Command {
 
     Angle compensatedAngle = shootingParameters.turretAngle();
 
-    if ((compensatedAngle.in(Degrees) < -20) && (compensatedAngle.in(Degrees) > -100)) {
-      double distance = swerve.getTurretToHubMeters();
-      double angleFix = MathUtil.clamp(25.0 - (5 * distance), 0.0, 25.0);
-      compensatedAngle = compensatedAngle.minus(Degrees.of(angleFix));
-      // compensatedAngle =
-      //     compensatedAngle.minus(Degrees.of(SmartDashboard.getNumber("Dynamic Turret Angle",
-      // 0)));
-    }
+    // if ((compensatedAngle.in(Degrees) < -20) && (compensatedAngle.in(Degrees) > -100)) {
+    //   double distance = swerve.getTurretToHubMeters();
+    //   double angleFix = MathUtil.clamp(25.0 - (5 * distance), 0.0, 25.0);
+    //   compensatedAngle = compensatedAngle.minus(Degrees.of(angleFix));
+    //   // compensatedAngle =
+    //   //     compensatedAngle.minus(Degrees.of(SmartDashboard.getNumber("Dynamic Turret Angle",
+    //   // 0)));
+    // }
+
+    // if (DriverStation.isAutonomous()) {
+    //   compensatedAngle = compensatedAngle.minus(Degrees.of(10));
+    // }
 
     AngularVelocity compensatedVelocity = shootingParameters.shooterSpeed();
 
     // double constant2 = SmartDashboard.getNumber("Dynamic SHooter Extra SPeed", 0);
 
-    compensatedVelocity =
-        RotationsPerSecond.of(
-            compensatedVelocity.in(RotationsPerSecond)
-                + shooterOffset / 100 * Math.abs(compensatedAngle.in(Degrees)));
+    // compensatedVelocity =
+    //     RotationsPerSecond.of(
+    //         compensatedVelocity.in(RotationsPerSecond)
+    //             + shooterOffset / 100 * Math.abs(compensatedAngle.in(Degrees)));
+
+    // compensatedVelocity = compensatedVelocity.times(0.965);
 
     turret.moveToAngle(compensatedAngle);
     hood.moveToAngle(shootingParameters.hoodAngle());

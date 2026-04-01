@@ -889,8 +889,7 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
   private Vector<N3> getVisionStdDevs(
       int tagCount, double averageDistance, double baseStandardDev) {
     double stdDevScale = 1 + (averageDistance * averageDistance) / 30;
-    double radianTrust = Double.POSITIVE_INFINITY;
-    if (tagCount > 1) radianTrust = Units.degreesToRadians(5);
+    double radianTrust = (tagCount > 1) ? Units.degreesToRadians(15) : Double.POSITIVE_INFINITY;
 
     return VecBuilder.fill(
         baseStandardDev * stdDevScale, baseStandardDev * stdDevScale, radianTrust);
@@ -911,9 +910,6 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
     if (distance > 4.5) {
       return false;
     }
-    // if (DriverStation.isAutonomous()) {
-    //   return false;
-    // }
 
     if (isOutOfBounds(visionPose)) {
       return false;
@@ -927,28 +923,26 @@ public class Swerve extends TunerSwerveDrivetrain implements Subsystem {
     if (averageDistance > 4.5) {
       return false;
     }
-    // if (DriverStation.isAutonomous()) {
-    //   return false;
-    // }
+
     if (isOutOfBounds(visionPose)) {
       return false;
     }
 
-    Optional<Rotation2d> rotationAtTime =
-        samplePoseAt(timestampSeconds).map((pose) -> pose.getRotation());
+    // Optional<Rotation2d> rotationAtTime =
+    //     samplePoseAt(timestampSeconds).map((pose) -> pose.getRotation());
 
-    if (rotationAtTime.isEmpty()) {
-      return false;
-    }
+    // if (rotationAtTime.isEmpty()) {
+    //   return false;
+    // }
 
-    Rotation2d angleDifference =
-        rotationAtTime.get().minus(visionPose.getRotation().toRotation2d());
+    // Rotation2d angleDifference =
+    //     rotationAtTime.get().minus(visionPose.getRotation().toRotation2d());
 
-    double angleTolerance = DriverStation.isAutonomous() ? 8.0 : 15.0;
+    // double angleTolerance = DriverStation.isAutonomous() ? 8.0 : 15.0;
 
-    if (Math.abs(angleDifference.getDegrees()) > angleTolerance) {
-      return false;
-    }
+    // if (Math.abs(angleDifference.getDegrees()) > angleTolerance) {
+    //   return false;
+    // }
 
     return true;
   }

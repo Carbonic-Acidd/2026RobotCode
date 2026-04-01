@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -13,9 +14,12 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.ShooterConstants;
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase {
@@ -25,8 +29,40 @@ public class Shooter extends SubsystemBase {
   private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
   private final VelocityVoltage velocityRequest = new VelocityVoltage(0);
 
+  public static final Slot0Configs slot340Configs =
+      new Slot0Configs().withKS(0.01).withKV(0.125).withKP(0.27).withKI(0.0);
+
   public Shooter() {
-    shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs);
+    shooterMotor.getConfigurator().apply(ShooterConstants.shooterConfigs.withSlot0(slot340Configs));
+  }
+
+  public Command newConfigs() {
+    return new DeferredCommand(
+        () -> {
+          double kP = SmartDashboard.getNumber("Dynamic Shooter KP", 0);
+          double kV = SmartDashboard.getNumber("Dynamic Shooter KV", 0);
+          return run(
+              () -> {
+                shooterMotor
+                    .getConfigurator()
+                    .apply(
+                        ShooterConstants.shooterConfigs.withSlot0(
+                            new Slot0Configs().withKS(0.01).withKV(kV).withKP(kP).withKI(0.0)));
+              });
+        },
+        Set.of(this));
+  }
+
+  public Command reachDynamicVelocity() {
+    return new DeferredCommand(
+        () -> {
+          return run(
+              () ->
+                  shooterMotor.setControl(
+                      velocityRequest.withVelocity(
+                          SmartDashboard.getNumber("Dynamic Shooter Speed", 0))));
+        },
+        Set.of(this));
   }
 
   public Command reachGoalVelocityCommand(AngularVelocity goalVelocity) {
@@ -96,8 +132,10 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     // shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalSpeed)));
 
-    // shooterMotor.setControl(
-    //     velocityRequest.withVelocity(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)));
+    if (Constants.tuningMode) {
+      shooterMotor.setControl(
+          velocityRequest.withVelocity(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)));
+    }
 
     SmartDashboard.putNumber(
         "Shooter/Current Angular Velocity", getCurrentVelocity().in(RotationsPerSecond));

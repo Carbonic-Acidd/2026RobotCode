@@ -125,6 +125,14 @@ public class Spindexer extends SubsystemBase {
         });
   }
 
+  public Command manualReverse() {
+    return run(
+        () -> {
+          spindexerMotor.set(-SpindexerConstants.spindexerMotorSpeed);
+          kickerMotor.set(-SpindexerConstants.kickerMotorSpeed);
+        });
+  }
+
   public Command runSpindexer() {
     return run(() -> spindexerMotor.set(SpindexerConstants.spindexerMotorSpeed));
   }

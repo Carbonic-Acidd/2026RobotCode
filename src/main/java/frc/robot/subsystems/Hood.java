@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.HoodConstants;
 import frc.robot.Constants.SOTMConstants;
 import frc.robot.Constants.TurretConstants;
@@ -227,11 +228,13 @@ public class Hood extends SubsystemBase {
 
     // hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle)); // remove this
 
-    // hoodMotor.setControl(
-    //     motionMagicRequest.withPosition(
-    //         Degrees.of(
-    //             SmartDashboard.getNumber(
-    //                 "Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees))))); // add this
+    if (Constants.tuningMode) {
+      hoodMotor.setControl(
+          motionMagicRequest.withPosition(
+              Degrees.of(
+                  SmartDashboard.getNumber(
+                      "Dynamic Hood Angle", HoodConstants.minAngle.in(Degrees))))); // add this
+    }
 
     SmartDashboard.putNumber("Hood/targetAngle", targetAngle.in(Degrees));
 
