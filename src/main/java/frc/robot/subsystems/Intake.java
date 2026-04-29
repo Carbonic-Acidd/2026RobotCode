@@ -3,7 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot.subsystems;
-
+//robot=be good
+//ethan is the worst programmer
+// ^statement = false
 import static edu.wpi.first.units.Units.Degrees;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -22,9 +24,8 @@ import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
   /*Objects */
-  private final TalonFX armMainMotor;
-  private final TalonFX armFollowerMotor;
-  private final TalonFX intakeMotor;
+  private final TalonFX armMotor;
+  private final TalonFX rollerMotor;
   // private final DigitalInput armMagnetSensor;
 
   private boolean wasDeployedLastLoop;
@@ -34,55 +35,48 @@ public class Intake extends SubsystemBase {
   private final MotionMagicVoltage motionMagicRequest =
       new MotionMagicVoltage(0).withEnableFOC(true);
 
-  private StatusSignal<Angle> armMainPosition;
-
-  private StatusSignal<Angle> armFollowerPosition;
+  private StatusSignal<Angle> armPosition;
 
   private final StatusSignal<Current> armCurrent;
   private final StatusSignal<AngularVelocity> armVelocity;
 
   /*MotionMagic*/
   public Intake() {
-    intakeMotor = new TalonFX(IntakeConstants.intakeID);
-    armMainMotor = new TalonFX(IntakeConstants.armMainID);
-    armFollowerMotor = new TalonFX(IntakeConstants.armFollowerID);
+    rollerMotor = new TalonFX(IntakeConstants.intakeID);
+    armMotor = new TalonFX(IntakeConstants.armMainID);
 
     // armMagnetSensor = new DigitalInput(IntakeConstants.armMagnetID);
-    intakeMotor.getConfigurator().apply(IntakeConstants.intakeConfigs);
-    armMainMotor.getConfigurator().apply(IntakeConstants.armMainConfigs);
-    armFollowerMotor.getConfigurator().apply(IntakeConstants.armFollowerConfigs);
+    rollerMotor.getConfigurator().apply(IntakeConstants.intakeConfigs);
+    armMotor.getConfigurator().apply(IntakeConstants.armMainConfigs);
 
-    armCurrent = armMainMotor.getStatorCurrent();
-    armVelocity = armMainMotor.getVelocity();
+    armCurrent = armMotor.getStatorCurrent();
+    armVelocity = armMotor.getVelocity();
 
-    armMainMotor.setPosition(IntakeConstants.minPosition);
-    armFollowerMotor.setPosition(IntakeConstants.minPosition);
+    armMotor.setPosition(IntakeConstants.minPosition);
 
-    armMainPosition = armMainMotor.getPosition();
-    armFollowerPosition = armFollowerMotor.getPosition();
+    armPosition = armMotor.getPosition();
   }
 
   public void setIntakeSpeed(double speed) {
-    intakeMotor.set(speed);
+    rollerMotor.set(speed);
   }
 
   public Command startIntake() {
-    return run(() -> intakeMotor.set(IntakeConstants.intakeSpeed)).withName("Start Intake");
+    return run(() -> rollerMotor.set(IntakeConstants.intakeSpeed)).withName("Start Intake");
   }
 
   public Command reverseIntakeRollers() {
-    return run(() -> intakeMotor.set(-1 * IntakeConstants.intakeSpeed)).withName("Reverse Intake");
+    return run(() -> rollerMotor.set(-1 * IntakeConstants.intakeSpeed)).withName("Reverse Intake");
   }
 
   public Command stopIntake() {
-    return runOnce(() -> intakeMotor.stopMotor()).withName("Stop Intake");
+    return runOnce(() -> rollerMotor.stopMotor()).withName("Stop Intake");
   }
 
   public Command stopArm() {
     return runOnce(
             () -> {
-              armMainMotor.stopMotor();
-              armFollowerMotor.stopMotor();
+              armMotor.stopMotor();
             })
         .withName("Stop Intake");
   }
@@ -91,44 +85,40 @@ public class Intake extends SubsystemBase {
     return run(
         () -> {
           if (Timer.getFPGATimestamp() % shakePeriod < shakePeriod / 2) {
-            moveDown();
+            moveMid();
           } else {
-            moveUp();
+            moveDown();
           }
         });
   }
 
   public void moveDown() {
-    armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
-    armFollowerMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
+    armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
+  }
+    public void moveMid() {
+    armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.shakePosition));
   }
 
+
   public void moveDownManual() {
-    armMainMotor.set(0.25);
-    armFollowerMotor.set(0.25);
+    armMotor.set(0.25);
   }
 
   public void moveUpManual() {
-    armMainMotor.set(-0.25);
-    armFollowerMotor.set(-0.25);
+    armMotor.set(-0.25);
   }
 
   public void moveUp() {
-    armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
-    armFollowerMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
+    armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
   }
 
   public Command intakeToPosition(boolean downPosition) {
     return run(() -> {
           if (downPosition) {
-            armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.downPosition));
+            armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
 
           } else {
-            armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.upPosition));
+            armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
           }
         })
         .withName("Intake To Position");
@@ -137,14 +127,10 @@ public class Intake extends SubsystemBase {
   public Command intakeSequence(boolean intakeDown) {
     return run(() -> {
           if (intakeDown) {
-            armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.downPosition));
+            armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.downPosition));
             setIntakeSpeed(IntakeConstants.intakeSpeed);
           } else {
-            armMainMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
-            armFollowerMotor.setControl(
-                motionMagicRequest.withPosition(IntakeConstants.upPosition));
+            armMotor.setControl(motionMagicRequest.withPosition(IntakeConstants.upPosition));
             setIntakeSpeed(0);
           }
         })
@@ -162,60 +148,51 @@ public class Intake extends SubsystemBase {
               moveDown();
               setIntakeSpeed(IntakeConstants.intakeSpeed);
             }),
-        () -> Math.abs(intakeMotor.get()) > 0.05);
+        () -> rollersRunning());
   }
 
   public boolean isIntakeDeployed() {
     if (RobotBase.isSimulation()) return true;
-    return armMainPosition.getValue().gte(IntakeConstants.armDownPositionTolerance);
+    return armPosition.getValue().gte(IntakeConstants.armDownPositionTolerance);
     // return true; // FOR TESTING IN SIM
   }
 
   public boolean rollersRunning() {
-    return Math.abs(intakeMotor.get()) > 0.05;
+    return Math.abs(rollerMotor.get()) > 0.05;
   }
 
   public Angle getMainArmAngle() {
-    return armMainPosition.getValue();
+    return armPosition.getValue();
   }
 
   public void setZero() {
-    armMainMotor.setPosition(0);
-    armFollowerMotor.setPosition(0);
+    armMotor.setPosition(0);
   }
 
   public void setArmMaxPosition() {
-    armMainMotor.setPosition(IntakeConstants.maxPosition);
-    armFollowerMotor.setPosition(IntakeConstants.maxPosition);
-    armMainPosition.refresh();
-    armFollowerPosition.refresh();
+    armMotor.setPosition(IntakeConstants.maxPosition);
+    armPosition.refresh();
   }
 
   public Command zeroArmCommand() {
     return Commands.startRun(
             // run once
             () -> {
-              armMainMotor.stopMotor();
-              armFollowerMotor.stopMotor();
+              armMotor.stopMotor();
 
-              armMainMotor.setPosition(0);
+              armMotor.setPosition(0);
             },
             // run
             () -> {
-              armMainMotor.set(IntakeConstants.armZeroSpeed);
-              armFollowerMotor.set(IntakeConstants.armZeroSpeed);
+              armMotor.set(IntakeConstants.armZeroSpeed);
             })
         .until(
-            () ->
-                armMainMotor.getStatorCurrent().getValueAsDouble()
-                    > IntakeConstants.armStallCurrent)
+            () -> armMotor.getStatorCurrent().getValueAsDouble() > IntakeConstants.armStallCurrent)
         .finallyDo(
             () -> {
-              armMainMotor.stopMotor();
-              armFollowerMotor.stopMotor();
+              armMotor.stopMotor();
 
-              armMainMotor.setPosition(IntakeConstants.maxPosition);
-              armFollowerMotor.setPosition(IntakeConstants.maxPosition);
+              armMotor.setPosition(IntakeConstants.maxPosition);
 
               // armMainMoo.setControl(motionMagicRequest.withPosition(Degrees.of(25)));
             });
@@ -252,11 +229,10 @@ public class Intake extends SubsystemBase {
     // }
     // wasDeployedLastLoop = isIntakeDeployed();
 
-    armMainPosition.refresh();
-    armFollowerPosition.refresh();
+    armPosition.refresh();
 
-    SmartDashboard.putNumber("Intake speed", intakeMotor.get());
-    SmartDashboard.putNumber("Intake Arm Position", armMainPosition.getValue().in(Degrees));
+    SmartDashboard.putNumber("Intake speed", rollerMotor.get());
+    SmartDashboard.putNumber("Intake Arm Position", armPosition.getValue().in(Degrees));
     SmartDashboard.putBoolean("Intake Arm Deployed", isIntakeDeployed());
   }
 }

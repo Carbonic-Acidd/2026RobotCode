@@ -228,7 +228,7 @@ public class Hood extends SubsystemBase {
 
     // hoodMotor.setControl(motionMagicRequest.withPosition(targetAngle)); // remove this
 
-    if (Constants.tuningMode) {
+    if (SmartDashboard.getBoolean("Data Point Mode", false)) {
       hoodMotor.setControl(
           motionMagicRequest.withPosition(
               Degrees.of(

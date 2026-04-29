@@ -132,7 +132,7 @@ public class Shooter extends SubsystemBase {
   public void periodic() {
     // shooterMotor.setControl(velocityRequest.withVelocity(linearToAngularVelocity(goalSpeed)));
 
-    if (Constants.tuningMode) {
+    if (SmartDashboard.getBoolean("Data Point Mode", false)) {
       shooterMotor.setControl(
           velocityRequest.withVelocity(SmartDashboard.getNumber("Dynamic Shooter Speed", 0)));
     }
